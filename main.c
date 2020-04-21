@@ -14,6 +14,8 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "briscola.h"
+#include <stdlib.h>
+#include <time.h>
  
 int main (int argc, char *argv[])
 {       	

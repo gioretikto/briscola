@@ -154,7 +154,6 @@ void init_game(struct player_data *player) {
 	shuffle(deck);
 	briscola = deck[0].suit;	/* the 1st card in deck is briscola */
 	
-	printf("Briscola is %u\n", deck[0].file);
 	player[0].card = &deck[2];
 
 	player[1].card = &deck[21];	
@@ -181,7 +180,6 @@ void card1_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_d
 	
 	gtk_image_set_from_file(GTK_IMAGE(image_table[0]), player[0].card[hand].file);
 	gtk_widget_hide(image_player[0]);
-	printf("hidden image player is %u\n", image_player[0]);
 	
 	who_moved = PLAYER;
 	
@@ -196,7 +194,6 @@ void card2_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_d
 	
 	gtk_image_set_from_file(GTK_IMAGE(image_table[0]), player[0].card[hand+1].file);
 	gtk_widget_hide(image_player[1]);
-		printf("hidden image player is %u\n", image_player[0]);
 	who_moved = PLAYER;
 	
 	move_reply(player, 1);
@@ -212,7 +209,6 @@ void card3_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_d
 	gtk_widget_hide(image_player[2]);
 	
 	who_moved = PLAYER;
-		printf("hidden image player is %u\n", image_player[0]);
 	move_reply(player, 2);
 }
 
@@ -246,7 +242,7 @@ void move_reply(struct player_data *player, int index) {
 		player[who_moved].total = player[who_moved].card[hand+index].value + player[!who_moved].card[hand+i].value;		
 	}
 	
-	else if ( (player[!who_moved].card[hand+i].suit == briscola) && (player[who_moved].card[index+i].suit != briscola) ) {
+	else if ( (player[!who_moved].card[hand+i].suit == briscola) && (player[who_moved].card[hand+index].suit != briscola) ) {
 		player[!who_moved].total = player[who_moved].card[hand+index].value + player[!who_moved].card[hand+i].value;
 	}	
 	
@@ -259,7 +255,6 @@ void move_reply(struct player_data *player, int index) {
 
 	update_points(player);
 	gtk_widget_hide(dealer_covered[i]);
-	printf("hidden image is dealer covered %u\n", dealer_covered[i]);
 	gtk_image_set_from_file(GTK_IMAGE(image_table[!who_moved]), player[!who_moved].card[hand+i].file);	
 
 }
