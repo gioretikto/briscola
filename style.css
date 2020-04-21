@@ -1,0 +1,28 @@
+window {
+  background-color: #53774c;
+}
+
+.my_hbox_dealer {
+  	background: none;
+	margin-left: 300px;
+	margin-bottom: 25px;
+	margin-top: 25px;
+}
+
+.my_hbox_player {
+  	background: none;
+	margin-left: 300px;
+	margin-top: 15px;
+	
+}
+
+.my_hbox_table {
+  	background: none;
+	margin-bottom: 5px;
+	margin-left:10px;
+}
+
+#card1_tavolo {
+	margin-left: 300px;
+	margin-right: 10px;
+}
