@@ -152,19 +152,43 @@ void create_window() {
 void init_game(struct player_data *player) {
 
 	shuffle(deck);
+	
 	briscola = deck[0].suit;	/* the 1st card in deck is briscola */
 	
 	player[0].card = &deck[2];
-
 	player[1].card = &deck[21];	
-
-	hand = 0;
+	
 	who_moved = PLAYER;
-		
+	hand = 0;
 	player[0].total = 0;
 	player[1].total = 0;
 	
 	display_cards(player);
+}
+
+void display_cards (struct player_data *player) {
+
+	/* Player's cards */
+	
+	image_player[0] = gtk_image_new_from_file (player[0].card[hand].file);
+	image_player[1] = gtk_image_new_from_file (player[0].card[hand+1].file);
+	image_player[2] = gtk_image_new_from_file (player[0].card[hand+2].file);	
+	
+  	/* Image of Dealer's covered cards */
+  	
+	dealer_covered[0] = gtk_image_new_from_file ("c/back.png");
+	dealer_covered[1] = gtk_image_new_from_file ("c/back.png");
+	dealer_covered[2] = gtk_image_new_from_file ("c/back.png");
+		
+	/* Images for cards played */
+	image_table[0] = gtk_image_new ();
+	image_table[1] = gtk_image_new ();
+  		
+	/* Deck with Briscola */
+	  	
+  	image_briscola = gtk_image_new_from_file (deck[0].file);
+	
+  	image_deck_pile = gtk_image_new_from_file ("c/deck.png");
 }
 
 void destroy (GtkWidget *window, gpointer data)
@@ -261,37 +285,14 @@ void move_reply(struct player_data *player, int index) {
 
 void update_points(struct player_data *player)
 {
-	gchar *display;
+	char *display;
     display = g_strdup_printf("%d", player[0].total);					/* convert num to str */
-    gtk_label_set_text (GTK_LABEL(label_player[0]), display);		/* set label to "display */
+    gtk_label_set_text (GTK_LABEL(label_player[0]), display);			/* set label to "display */
+    
+    g_free(display);
     
     display = g_strdup_printf("%d", player[1].total);					/* convert num to str */
     gtk_label_set_text (GTK_LABEL(label_player[1]), display);	
         
     g_free(display);		                    						/* free display */
-}
-
-void display_cards (struct player_data *player) {
-
-	/* Player's cards */
-	
-	image_player[0] = gtk_image_new_from_file (player[0].card[hand].file);
-	image_player[1] = gtk_image_new_from_file (player[0].card[hand+1].file);
-	image_player[2] = gtk_image_new_from_file (player[0].card[hand+2].file);	
-	
-  	/* Image of Dealer's covered cards */
-  	
-	dealer_covered[0] = gtk_image_new_from_file ("c/back.png");
-	dealer_covered[1] = gtk_image_new_from_file ("c/back.png");
-	dealer_covered[2] = gtk_image_new_from_file ("c/back.png");
-		
-	/* Images for cards played */
-	image_table[0] = gtk_image_new ();
-	image_table[1] = gtk_image_new ();
-  		
-	/* Deck with Briscola */
-	  	
-  	image_briscola = gtk_image_new_from_file (deck[0].file);
-	
-  	image_deck_pile = gtk_image_new_from_file ("c/deck.png");
 }

@@ -5,7 +5,7 @@ SRCS = main.c briscola.c gtk_engine.c dialogs.c
 OBJS = $(SRCS:.c=.o)
 
 briscola: $(OBJS)
-	 $(CXX) -o $@ $^ $(LDFLAGS) $(CFLAGS)
+	 $(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 clean:
 	rm -f $(OBJFILES) $(TARGET)
 install:
