@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 
+/*
 int number_players;
+
 
 void get_number_players(GtkWidget *window) {
 	GtkWidget *dialog;
@@ -20,7 +22,8 @@ void get_number_players(GtkWidget *window) {
 	number_players = gtk_dialog_run (GTK_DIALOG (dialog));
 	
 	gtk_widget_destroy (dialog);
-}   	
+}   
+*/	
 
 void activate_about() {
 

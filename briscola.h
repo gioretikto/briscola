@@ -9,7 +9,9 @@ struct player_data {
 
 	int total;
 	
-	struct card *card;	
+	struct card *card[3];
+	
+	int index;	/*index for card played */
 };
 
 struct card {
@@ -27,6 +29,9 @@ void card2_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_d
 void card3_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_data *player);
 void activate_about();
 void init_game(struct player_data *player);
-void move_reply(struct player_data *player, int index);
+void move_reply(struct player_data *player);
 void update_points(struct player_data *player);
 void display_cards (struct player_data *player);
+int min_max (struct player_data *player, _Bool s);
+gboolean assign_points(struct player_data *player);
+void draw_cards(struct player_data *player);
