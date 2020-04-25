@@ -4,21 +4,36 @@
 #define CARDS 40
 
 enum suit {BASTONI, DENARI, COPPE, SPADE};
+enum states {BLOCK, PLAY};
+
+enum players {PLY0, PLY1};
+enum players turn;
+
+enum states status;
 
 struct player_data {
 
-	int total;
+	int total;				/* total points */
 	
 	struct card *card[3];
 	
-	int index;	/*index for card played */
+	int slot;				/* card index  */
 };
 
 struct card {
+	int index;
    	const char *file;
    	int value;
-   	enum suit suit;
+   	enum suit suit;   	
 };
+
+struct game {
+	GtkWidget *label_player[2];
+	GtkWidget *image_table[2];
+	GtkWidget *image_briscola, *image_deck_pile;
+	GtkWidget *PLY1_covered[3];
+	GtkWidget *PLY0_image[3];
+}table;
 
 void create_window();
 void destroy (GtkWidget *window, gpointer data);
@@ -30,8 +45,9 @@ void card3_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_d
 void activate_about();
 void init_game(struct player_data *player);
 void move_reply(struct player_data *player);
-void update_points(struct player_data *player);
+void update_points(struct player_data *player, int index);
 void display_cards (struct player_data *player);
 int min_max (struct player_data *player, _Bool s);
 gboolean assign_points(struct player_data *player);
 void draw_cards(struct player_data *player);
+void move(struct player_data *player);
