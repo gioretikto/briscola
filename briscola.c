@@ -6,14 +6,11 @@ extern struct card deck[40];
 
 /*extern int number_players;*/
 
-int briscola;
-int cards_dealt;
-
 void init_game(struct player_data *player) {
 
 	shuffle(deck);
 	
-	briscola = deck[39].suit;	/* the 1st card in deck is briscola */
+	table.briscola = deck[39].suit;		/* the 1st card in deck is briscola */
 	
 	/* Deal first 6 cards */
 	
@@ -25,7 +22,7 @@ void init_game(struct player_data *player) {
 	player[PLY1].card[1] = &deck[4];
 	player[PLY1].card[2] = &deck[5];
 	
-	cards_dealt = 6;
+	table.cards_dealt = 6;
 	
 	player[PLY0].total = 0;
 	player[PLY1].total = 0;
@@ -66,7 +63,7 @@ void move(struct player_data *player) {
 	
 	gtk_widget_hide(table.PLY1_covered[i]);
 
-	status = PLAY;
+	table.status = PLAY;
 }
 
 void move_reply(struct player_data *player) {
@@ -88,11 +85,11 @@ void move_reply(struct player_data *player) {
 	/* if it is an ace or three or 10 */
 	else if ( (player[PLY0].card[index]->value == 11) || (player[PLY0].card[index]->value == 10) || (player[PLY0].card[index]->value == 4) ) {	
 		
-		if (player[PLY0].card[index]->suit != briscola) { /* try to take with a card of min value 0, else with another card */
+		if (player[PLY0].card[index]->suit != table.briscola) { /* try to take with a card of min value 0, else with another card */
 			
 			tmp = i = min_max(&player[PLY1], 0); 
 				
-			if (player[PLY1].card[i]->value < player[PLY0].card[index]->value) { /* if the min value cannot overtake*/
+			if (player[PLY1].card[i]->value < player[PLY0].card[index]->value) { 	   /* if the min value cannot overtake*/
 				i = min_max(&player[1], 1);   /* try with max */
 				
 				if (player[PLY1].card[i]->value > player[PLY0].card[index]->value)	   /* Try to see if the max value can do it */
@@ -113,7 +110,7 @@ void move_reply(struct player_data *player) {
 	/* Hide card Played by PLY1 */
 	gtk_widget_hide(table.PLY1_covered[i]);
 	
-	printf("Briscola: %d\n", briscola);
+	printf("Briscola: %d\n", table.briscola);
  	printf("Played: value %d , suit %d, Index: %d \n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit, index);
  	printf("Reply: value %d , suit %d, Index: %d \n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, i);
 	
@@ -133,9 +130,7 @@ gboolean assign_points(struct player_data *player) {
 	int indexR;		/* Index of player replying */
 	int indexM;		/* Index of player who moved */
 		
-	int winner;
-		
-	if (turn == PLY0) {
+	if (table.turn == PLY0) {
 		PLYM = PLY0;
 		PLYR = PLY1;
 		indexM = player[PLY0].slot;
@@ -149,61 +144,61 @@ gboolean assign_points(struct player_data *player) {
 		indexR = player[PLY0].slot;
 	}
 		
-	/* Evaluate the winner of the hand */
+	/* Evaluate the table.winner of the hand */
 		
 	if (player[PLYR].card[indexR]->suit == player[PLYM].card[indexM]->suit)	{
 		
 		if (player[PLYR].card[indexR]->value == player[PLYM].card[indexM]->value) {	/* if they are both cards of 0 value */
 		
 				if (player[PLYR].card[indexR]->index > player[PLYM].card[indexM]->index)
-					winner = PLYR;
+					table.winner = PLYR;
 				else
-					winner = PLYM;
+					table.winner = PLYM;
 		}
 		
 		else if (player[PLYR].card[indexR]->value > player[PLYM].card[indexM]->value)
-			winner = PLYR;
+			table.winner = PLYR;
 		else
-			winner = PLYM;
+			table.winner = PLYM;
 	}
 					
-	else if ( (player[PLYR].card[indexR]->suit == briscola) || (player[PLYM].card[indexM]->suit == briscola) ) {
+	else if ( (player[PLYR].card[indexR]->suit == table.briscola) || (player[PLYM].card[indexM]->suit == table.briscola) ) {
 		
-		if (player[PLYR].card[indexR]->suit == briscola)
-			winner = PLYR;
+		if (player[PLYR].card[indexR]->suit == table.briscola)
+			table.winner = PLYR;
 		else
-			winner = PLYM;
+			table.winner = PLYM;
 	}
 		
 	else
-		winner = PLYM;
+		table.winner = PLYM;
 
-	/* Assign Points to the winner of the hand*/
+	/* Assign Points to the table.winner of the hand*/
 		
-	if (winner == PLYR)
-		player[PLYR].total = player[PLYR].total + (player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value);
+	if (table.winner == PLYR)
+		player[PLYR].total = player[PLYR].total + player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
 		
 	else
-		player[PLYM].total = player[PLYM].total + (player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value);
+		player[PLYM].total = player[PLYR].total + player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
 		
-	turn = winner;
+	table.turn = table.winner;
 		
-	update_points(&player[winner], winner);
+	update_points(&player[table.winner], table.winner);
 		
 	draw_cards(player);
 	
-	cards_dealt += 2;
+	table.cards_dealt += 2;
 	
 	printf("Total Points PLY0: %d\n", player[PLY0].total);
 	printf("Total Points PLY1: %d\n", player[PLY1].total);
-	printf("Winner is: %d\n", winner);
+	printf("Winner is: %d\n", table.winner);
 	printf("Player M points: %d\n", player[PLYM].card[indexM]->value);
 	printf("Player R points: %d\n", player[PLYR].card[indexR]->value);
 	
-	if (turn == PLY1)
+	if (table.turn == PLY1)
 		move(&player[PLY1]);
 	else
-		status = PLAY;
+		table.status = PLAY;
 
 	return FALSE;
 }
@@ -215,14 +210,14 @@ void draw_cards (struct player_data *player) {
 	
 	/* Draw new card from deck */
 
-	if (turn == PLY0) {
-		player[PLY0].card[index0] = &deck[cards_dealt];
-		player[PLY1].card[index1] = &deck[cards_dealt+1];
+	if (table.turn == PLY0) {
+		player[PLY0].card[index0] = &deck[table.cards_dealt];
+		player[PLY1].card[index1] = &deck[table.cards_dealt+1];
 	}
 	
 	else {
-		player[PLY0].card[index0] = &deck[cards_dealt+1];
-		player[PLY1].card[index1] = &deck[cards_dealt];
+		player[PLY0].card[index0] = &deck[table.cards_dealt+1];
+		player[PLY1].card[index1] = &deck[table.cards_dealt];
 	}
 	
 	/* Set the new card for PLY0 */
@@ -246,7 +241,7 @@ int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min 
 	
 		a[i] = player->card[i]->value;
 				
-		if (player->card[i]->suit == briscola)
+		if (player->card[i]->suit == table.briscola)
 			a[i] += 1;
 	}
 	

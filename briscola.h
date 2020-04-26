@@ -7,9 +7,6 @@ enum suit {BASTONI, DENARI, COPPE, SPADE};
 enum states {BLOCK, PLAY};
 
 enum players {PLY0, PLY1};
-enum players turn;
-
-enum states status;
 
 struct player_data {
 
@@ -18,13 +15,14 @@ struct player_data {
 	struct card *card[3];
 	
 	int slot;				/* card index  */
+	
 };
 
 struct card {
 	int index;
    	const char *file;
    	int value;
-   	enum suit suit;   	
+   	enum suit suit;
 };
 
 struct game {
@@ -33,6 +31,11 @@ struct game {
 	GtkWidget *image_briscola, *image_deck_pile;
 	GtkWidget *PLY1_covered[3];
 	GtkWidget *PLY0_image[3];
+	enum states status;
+	enum players turn;
+	enum players winner;
+	enum suit briscola;
+	int cards_dealt;
 }table;
 
 void create_window();
