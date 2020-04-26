@@ -57,11 +57,11 @@ void move(struct player_data *player) {
 	
 	i = min_max(player, 0);
 	
+	gtk_widget_hide(table.PLY1_covered[i]);
+	
 	gtk_image_set_from_file(GTK_IMAGE(table.image_table[PLY1]), player->card[i]->file);
 	
 	player->slot = i;
-	
-	gtk_widget_hide(table.PLY1_covered[i]);
 
 	table.status = PLAY;
 }
@@ -76,8 +76,6 @@ void move_reply(struct player_data *player) {
 	 	printf("value %d , suit %d\n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit);
 	
 	i = 0;
-	
-	player[PLY1].slot = i;
 	
 	if (player[PLY0].card[index]->value == 0)		/* if it is a scartina reply with another scartina */
 		i = min_max(&player[1], 0);
@@ -107,12 +105,14 @@ void move_reply(struct player_data *player) {
 		}
 	}
 	
+	player[PLY1].slot = i;
+	
 	/* Hide card Played by PLY1 */
 	gtk_widget_hide(table.PLY1_covered[i]);
 	
 	printf("Briscola: %d\n", table.briscola);
- 	printf("Played: value %d , suit %d, Index: %d \n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit, index);
- 	printf("Reply: value %d , suit %d, Index: %d \n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, i);
+ 	printf("Played: value %d, suit %d, Index: %d \n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit, index);
+ 	printf("Reply: value %d, suit %d, Index: %d \n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, player[PLY1].slot);
 	
 	/* Move card played by PLY1 on the table */
 	
@@ -179,7 +179,17 @@ gboolean assign_points(struct player_data *player) {
 		player[PLYR].total = player[PLYR].total + player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
 		
 	else
-		player[PLYM].total = player[PLYR].total + player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
+		player[PLYM].total = player[PLYM].total + player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
+		
+	printf("Player who moved is: %d\n", PLYM);
+	printf("Player who replied is: %d\n", PLYR);
+	printf("Card index played is: %d\n", indexM);
+	printf("Card index replayed is: %d\n", indexR);
+	printf("Total Points PLY0: %d\n", player[PLY0].total);
+	printf("Total Points PLY1: %d\n", player[PLY1].total);
+	printf("Winner is: %d\n", table.winner);
+	printf("Player M hand points: %d\n", player[PLYM].card[indexM]->value);
+	printf("Player R hand points: %d\n\n\n", player[PLYR].card[indexR]->value);
 		
 	table.turn = table.winner;
 		
@@ -189,16 +199,13 @@ gboolean assign_points(struct player_data *player) {
 	
 	table.cards_dealt += 2;
 	
-	printf("Total Points PLY0: %d\n", player[PLY0].total);
-	printf("Total Points PLY1: %d\n", player[PLY1].total);
-	printf("Winner is: %d\n", table.winner);
-	printf("Player M points: %d\n", player[PLYM].card[indexM]->value);
-	printf("Player R points: %d\n", player[PLYR].card[indexR]->value);
-	
 	if (table.turn == PLY1)
 		move(&player[PLY1]);
 	else
 		table.status = PLAY;
+	
+	printf("Table status %d\n", table.status);
+	gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
 
 	return FALSE;
 }
@@ -270,8 +277,8 @@ int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min 
 	return index;
 }
 
-void update_points(struct player_data *player, int index)
-{
+void update_points(struct player_data *player, int index) {
+
 	char *display;
     display = g_strdup_printf("%d", player[index].total);					/* convert num to str */
     gtk_label_set_text (GTK_LABEL(table.label_player[index]), display);		/* set label to "display */
