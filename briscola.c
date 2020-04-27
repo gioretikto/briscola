@@ -59,7 +59,8 @@ void move(struct player_data *player) {
 	
 	gtk_widget_hide(table.PLY1_covered[i]);
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.image_table[PLY1]), player->card[i]->file);
+	gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY1]), player->card[i]->file);
+	gtk_widget_show(table.played_card[PLY1]);
 	
 	player->slot = i;
 
@@ -81,7 +82,7 @@ void move_reply(struct player_data *player) {
 		i = min_max(&player[1], 0);
 	
 	/* if it is an ace or three or 10 */
-	else if ( (player[PLY0].card[index]->value == 11) || (player[PLY0].card[index]->value == 10) || (player[PLY0].card[index]->value == 4) ) {	
+	else if ( (player[PLY0].card[index]->value == 11) || (player[PLY0].card[index]->value == 10) || (player[PLY0].card[index]->value == 4) ) {
 		
 		if (player[PLY0].card[index]->suit != table.briscola) { /* try to take with a card of min value 0, else with another card */
 			
@@ -105,6 +106,9 @@ void move_reply(struct player_data *player) {
 		}
 	}
 	
+	else
+		i = min_max(&player[1], 0);
+	
 	player[PLY1].slot = i;
 	
 	/* Hide card Played by PLY1 */
@@ -116,14 +120,14 @@ void move_reply(struct player_data *player) {
 	
 	/* Move card played by PLY1 on the table */
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.image_table[PLY1]), player[PLY1].card[i]->file);
+	gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY1]), player[PLY1].card[i]->file);
+	gtk_widget_show(table.played_card[PLY1]);
 	
 	/* Assign points of the hand */
-	
-	g_timeout_add(2000, (GSourceFunc)assign_points, player);
+	assign_points(player);	
 }
 
-gboolean assign_points(struct player_data *player) {
+void assign_points (struct player_data *player) {
 
 	int PLYM;		/* Player who moved */
 	int PLYR;		/* Player replying */
@@ -199,11 +203,19 @@ gboolean assign_points(struct player_data *player) {
 	
 	table.cards_dealt += 2;
 	
+	g_timeout_add(2000, (GSourceFunc)clean_table, player);
+	
 	if (table.turn == PLY1)
 		move(&player[PLY1]);
 	else
 		table.status = PLAY;
-	
+}
+
+gboolean clean_table (struct player_data *player) {
+
+	gtk_widget_hide(table.played_card[PLY0]);
+	gtk_widget_hide(table.played_card[PLY1]);
+		
 	printf("Table status %d\n", table.status);
 	gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
 
@@ -231,12 +243,12 @@ void draw_cards (struct player_data *player) {
 	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[index0]->file);
 
 	/* Display the cards */
-	gtk_widget_show(table.PLY0_image[index0]);		
+	gtk_widget_show(table.PLY0_image[index0]);
 	gtk_widget_show(table.PLY1_covered[index1]);
 	
 	/* Hide played cards */
-	gtk_widget_hide(table.image_table[PLY0]);
-	gtk_widget_hide(table.image_table[PLY1]);
+	gtk_widget_hide(table.played_card[PLY0]);
+	gtk_widget_hide(table.played_card[PLY1]);
 }
 
 int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min else max */
@@ -248,8 +260,12 @@ int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min 
 	
 		a[i] = player->card[i]->value;
 				
-		if (player->card[i]->suit == table.briscola)
-			a[i] += 1;
+		if (player->card[i]->suit == table.briscola) {
+			if (player->card[i]->value == 0)
+				a[i] += 2;
+			else
+				a[i] += 1;
+		}
 	}
 	
 	index = 0;

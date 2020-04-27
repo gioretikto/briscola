@@ -27,7 +27,7 @@ struct card {
 
 struct game {
 	GtkWidget *label_player[2];
-	GtkWidget *image_table[2];
+	GtkWidget *played_card[2];
 	GtkWidget *image_briscola, *image_deck_pile;
 	GtkWidget *PLY1_covered[3];
 	GtkWidget *PLY0_image[3];
@@ -51,6 +51,7 @@ void move_reply(struct player_data *player);
 void update_points(struct player_data *player, int index);
 void display_cards (struct player_data *player);
 int min_max (struct player_data *player, _Bool s);
-gboolean assign_points(struct player_data *player);
+void assign_points(struct player_data *player);
 void draw_cards(struct player_data *player);
 void move(struct player_data *player);
+gboolean clean_table (struct player_data *player);

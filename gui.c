@@ -25,8 +25,8 @@ void create_window() {
     table.label_player[1] = gtk_label_new ("0");
     
    	/* Images for cards played */
-   	table.image_table[PLY0] = gtk_image_new ();
-	table.image_table[PLY1] = gtk_image_new ();
+   	table.played_card[PLY0] = gtk_image_new ();
+	table.played_card[PLY1] = gtk_image_new ();
             	
     gtk_header_bar_set_title (GTK_HEADER_BAR (headbar), "Briscola");
     gtk_window_set_title (GTK_WINDOW (window), "Briscola");    
@@ -70,8 +70,8 @@ void create_window() {
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.label_player[1]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_briscola);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_deck_pile);
-	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_table[0]);
-	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_table[1]);
+	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[0]);
+	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[1]);
 	
 	GtkStyleContext *context1;
 	context1 = gtk_widget_get_style_context(hbox_player);			/* Apply style to player's box */
@@ -85,7 +85,8 @@ void create_window() {
 	context3 = gtk_widget_get_style_context(hbox_table);			/* Apply style to biscola's box */
 	gtk_style_context_add_class(context3, "my_hbox_table");
 	
-	gtk_widget_set_name (table.image_table[0], "card1_tavolo");  	/* Apply CSS style to image_table[0] */
+	gtk_widget_set_name (table.played_card[0], "card1_tavolo");  	/* Apply CSS style to played_card[0] */
+	gtk_widget_set_name (table.played_card[1], "card2_tavolo");  	/* Apply CSS style to played_card[0] */
 	
 	g_signal_connect (about_button, "clicked", G_CALLBACK (activate_about), NULL);
 	g_signal_connect (G_OBJECT (event_box1), "button_press_event", G_CALLBACK (card1_clicked), player);
@@ -94,6 +95,9 @@ void create_window() {
     g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (destroy), NULL);
 	
 	gtk_widget_show_all (window);
+
+	gtk_widget_hide(table.played_card[PLY0]);
+	gtk_widget_hide(table.played_card[PLY1]);
 	    
 	gtk_main();
 }
@@ -105,8 +109,10 @@ void card1_clicked (GtkWidget *event_box1, GdkEventButton *event, struct player_
 		table.status = BLOCK;
 		
 		player[PLY0].slot = 0;		
-
-		gtk_image_set_from_file(GTK_IMAGE(table.image_table[PLY0]), player[PLY0].card[0]->file);		
+		
+		/* Display played card on table */
+		gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY0]), player[PLY0].card[0]->file);
+		gtk_widget_show(table.played_card[PLY0]);
 		
 		/* Hide played card */
 		gtk_widget_hide(table.PLY0_image[0]);
@@ -114,7 +120,7 @@ void card1_clicked (GtkWidget *event_box1, GdkEventButton *event, struct player_
 		if (table.turn == PLY0)
 			move_reply(player);
 		else
-			g_timeout_add(2000, (GSourceFunc)assign_points, player);
+			assign_points(player);
 	}
 }
 
@@ -127,7 +133,8 @@ void card2_clicked (GtkWidget *event_box2, GdkEventButton *event, struct player_
 		player[PLY0].slot = 1;
 
 		/* Display played card on table */
-		gtk_image_set_from_file(GTK_IMAGE(table.image_table[PLY0]), player[PLY0].card[1]->file);
+		gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY0]), player[PLY0].card[1]->file);
+		gtk_widget_show(table.played_card[PLY0]);
 		
 		/* Hide played card */
 		gtk_widget_hide(table.PLY0_image[1]);
@@ -135,7 +142,7 @@ void card2_clicked (GtkWidget *event_box2, GdkEventButton *event, struct player_
 		if (table.turn == PLY0)
 			move_reply(player);
 		else
-			g_timeout_add(2000, (GSourceFunc)assign_points, player);		
+			assign_points(player);
 	}
 }
 
@@ -148,15 +155,17 @@ void card3_clicked (GtkWidget *event_box3, GdkEventButton *event, struct player_
 		player[PLY0].slot = 2;
 
 		/* Display played card on table */
-		gtk_image_set_from_file(GTK_IMAGE(table.image_table[PLY0]), player[PLY0].card[2]->file);
+		gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY0]), player[PLY0].card[2]->file);
+		gtk_widget_show(table.played_card[PLY0]);
 		
 		/* Hide played card */
 		gtk_widget_hide(table.PLY0_image[2]);
 		
 		if (table.turn == PLY0)
 			move_reply(player);
+			
 		else
-			g_timeout_add(2000, (GSourceFunc)assign_points, player);
+			assign_points(player);
 	}
 }
 
