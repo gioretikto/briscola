@@ -17,12 +17,12 @@ void create_window() {
    	event_box1 = gtk_event_box_new ();
    	event_box2 = gtk_event_box_new ();
 	event_box3 = gtk_event_box_new ();
-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 30);   
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);   
     hbox_dealer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);
     hbox_table = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
     hbox_player = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);   
-    table.label_player[0] = gtk_label_new ("0");
-    table.label_player[1] = gtk_label_new ("0");
+    table.label_player[PLY0] = gtk_label_new ("0");
+    table.label_player[PLY1] = gtk_label_new ("0");
     
    	/* Images for cards played */
    	table.played_card[PLY0] = gtk_image_new ();
@@ -57,21 +57,21 @@ void create_window() {
 	gtk_container_add(GTK_CONTAINER (vbox), hbox_dealer);
 	gtk_container_add(GTK_CONTAINER (vbox), hbox_table);
 	gtk_container_add(GTK_CONTAINER (vbox), hbox_player);
-	gtk_container_add(GTK_CONTAINER (hbox_player), event_box1);
-	gtk_container_add(GTK_CONTAINER (hbox_player), event_box2);
-	gtk_container_add(GTK_CONTAINER (hbox_player), event_box3);
-	gtk_container_add(GTK_CONTAINER (hbox_player), table.label_player[0]);
-	gtk_container_add(GTK_CONTAINER (event_box1), table.PLY0_image[0]);
-	gtk_container_add(GTK_CONTAINER (event_box2), table.PLY0_image[1]);
-	gtk_container_add(GTK_CONTAINER (event_box3), table.PLY0_image[2]);
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.PLY1_covered[0]);
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.PLY1_covered[1]);
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.PLY1_covered[2]);
-	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.label_player[1]);
+	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.label_player[PLY1]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_briscola);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_deck_pile);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[0]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[1]);
+	gtk_container_add(GTK_CONTAINER (hbox_player), event_box1);
+	gtk_container_add(GTK_CONTAINER (hbox_player), event_box2);
+	gtk_container_add(GTK_CONTAINER (hbox_player), event_box3);
+	gtk_container_add(GTK_CONTAINER (event_box1), table.PLY0_image[0]);
+	gtk_container_add(GTK_CONTAINER (event_box2), table.PLY0_image[1]);
+	gtk_container_add(GTK_CONTAINER (event_box3), table.PLY0_image[2]);
+	gtk_container_add(GTK_CONTAINER (hbox_player), table.label_player[PLY0]);
 	
 	GtkStyleContext *context1;
 	context1 = gtk_widget_get_style_context(hbox_player);			/* Apply style to player's box */
@@ -82,11 +82,11 @@ void create_window() {
 	gtk_style_context_add_class(context2, "my_hbox_dealer");
 	
 	GtkStyleContext *context3;
-	context3 = gtk_widget_get_style_context(hbox_table);			/* Apply style to biscola's box */
+	context3 = gtk_widget_get_style_context(hbox_table);			/* Apply style to card displayed on tables */
 	gtk_style_context_add_class(context3, "my_hbox_table");
-	
-	gtk_widget_set_name (table.played_card[0], "card1_tavolo");  	/* Apply CSS style to played_card[0] */
-	gtk_widget_set_name (table.played_card[1], "card2_tavolo");  	/* Apply CSS style to played_card[0] */
+
+	gtk_widget_set_name (table.played_card[0], "card_played1");
+
 	
 	g_signal_connect (about_button, "clicked", G_CALLBACK (activate_about), NULL);
 	g_signal_connect (G_OBJECT (event_box1), "button_press_event", G_CALLBACK (card1_clicked), player);
@@ -108,19 +108,19 @@ void card1_clicked (GtkWidget *event_box1, GdkEventButton *event, struct player_
 	
 		table.status = BLOCK;
 		
-		player[PLY0].slot = 0;		
-		
-		/* Display played card on table */
-		gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY0]), player[PLY0].card[0]->file);
-		gtk_widget_show(table.played_card[PLY0]);
+		player[PLY0].slot = 0;
 		
 		/* Hide played card */
-		gtk_widget_hide(table.PLY0_image[0]);
-		
+		gtk_widget_hide(table.PLY0_image[0]);		
+	
 		if (table.turn == PLY0)
 			move_reply(player);
-		else
+			
+		else {
+			gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
+			gtk_widget_show(table.played_card[1]);	
 			assign_points(player);
+		}		
 	}
 }
 
@@ -131,18 +131,19 @@ void card2_clicked (GtkWidget *event_box2, GdkEventButton *event, struct player_
 		table.status = BLOCK;
 
 		player[PLY0].slot = 1;
-
-		/* Display played card on table */
-		gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY0]), player[PLY0].card[1]->file);
-		gtk_widget_show(table.played_card[PLY0]);
 		
 		/* Hide played card */
 		gtk_widget_hide(table.PLY0_image[1]);
+
 		
 		if (table.turn == PLY0)
 			move_reply(player);
-		else
+			
+		else {
+			gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
+			gtk_widget_show(table.played_card[1]);	
 			assign_points(player);
+		}
 	}
 }
 
@@ -153,20 +154,30 @@ void card3_clicked (GtkWidget *event_box3, GdkEventButton *event, struct player_
 		table.status = BLOCK;
 	
 		player[PLY0].slot = 2;
-
-		/* Display played card on table */
-		gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY0]), player[PLY0].card[2]->file);
-		gtk_widget_show(table.played_card[PLY0]);
 		
 		/* Hide played card */
 		gtk_widget_hide(table.PLY0_image[2]);
-		
+
 		if (table.turn == PLY0)
 			move_reply(player);
 			
-		else
+		else {
+			gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
+			gtk_widget_show(table.played_card[1]);	
 			assign_points(player);
+		}
 	}
+}
+
+void update_points(struct player_data *player, int index) {
+
+	printf("\n\nIndex Update: %d\n", index);
+
+	char *display;
+    display = g_strdup_printf("%d", player[index].total);					/* convert num to str */
+    gtk_label_set_text (GTK_LABEL(table.label_player[index]), display);		/* set label to "display */
+    
+    g_free(display);
 }
 
 void destroy (GtkWidget *window, gpointer data)

@@ -3,31 +3,24 @@ window {
 }
 
 .my_hbox_dealer {
-  	background: none;
-	margin-left: 300px;
+	margin-left: 310px;
 	margin-bottom: 25px;
 	margin-top: 25px;
 }
 
+.my_hbox_table {
+	margin-left: 40px;
+}
+
 .my_hbox_player {
-  	background: none;
-	margin-left: 300px;
-	margin-top: 15px;
+
+	margin-left: 310px;
+	margin-top: 80px;
 	
 }
 
-.my_hbox_table {
-  	background: none;
-	margin-bottom: 5px;
-	margin-left:10px;
-}
+#card_played1 {
 
-#card1_tavolo {
-	margin-left: 300px;
-	margin-right: 10px;
-}
-
-#card2_tavolo {
-	margin-left: 430px;
-	margin-right: 10px;
+	margin-left: 100px;
+	margin-right: 20px;
 }

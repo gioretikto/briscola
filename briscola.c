@@ -30,44 +30,25 @@ void init_game(struct player_data *player) {
 	display_cards(player);
 }
 
-void display_cards (struct player_data *player) {
-
-	/* Player's cards */
-	
-	table.PLY0_image[0] = gtk_image_new_from_file (player[PLY0].card[0]->file);
-	table.PLY0_image[1] = gtk_image_new_from_file (player[PLY0].card[1]->file);
-	table.PLY0_image[2] = gtk_image_new_from_file (player[PLY0].card[2]->file);
-	
-	/* Image of Dealer's covered cards */
-  	
-	table.PLY1_covered[0] = gtk_image_new_from_file ("c/back.png");
-	table.PLY1_covered[1] = gtk_image_new_from_file ("c/back.png");
-	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
-  		
-	/* Images for Briscola and deck */
-	  	
-  	table.image_briscola = gtk_image_new_from_file (deck[39].file);
-	
-  	table.image_deck_pile = gtk_image_new_from_file ("c/deck.png");
-}
-
 void move(struct player_data *player) {
 
 	int i;
 	
 	i = min_max(player, 0);
-	
+	player->slot = i;
+		
 	gtk_widget_hide(table.PLY1_covered[i]);
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY1]), player->card[i]->file);
-	gtk_widget_show(table.played_card[PLY1]);
-	
-	player->slot = i;
+	gtk_image_set_from_file(GTK_IMAGE(table.played_card[0]), player->card[i]->file);
+	gtk_widget_show(table.played_card[0]);	
 
 	table.status = PLAY;
 }
 
 void move_reply(struct player_data *player) {
+
+	gtk_image_set_from_file(GTK_IMAGE(table.played_card[0]), player[PLY0].card[player[PLY0].slot]->file);
+	gtk_widget_show(table.played_card[0]);
 
 	int i;
 	int tmp;
@@ -78,8 +59,15 @@ void move_reply(struct player_data *player) {
 	
 	i = 0;
 	
-	if (player[PLY0].card[index]->value == 0)		/* if it is a scartina reply with another scartina */
-		i = min_max(&player[1], 0);
+	if (player[PLY0].card[index]->value == 0) {
+	
+		if (player[PLY0].card[index]->suit != table.briscola) {
+			if (find_charge(player) != -1)
+				i = find_charge(player);		
+			else
+				i = min_max(&player[1], 0);				/* if it is a scartina reply with another scartina */
+		}		
+	}
 	
 	/* if it is an ace or three or 10 */
 	else if ( (player[PLY0].card[index]->value == 11) || (player[PLY0].card[index]->value == 10) || (player[PLY0].card[index]->value == 4) ) {
@@ -180,12 +168,12 @@ void assign_points (struct player_data *player) {
 	/* Assign Points to the table.winner of the hand*/
 		
 	if (table.winner == PLYR)
-		player[PLYR].total = player[PLYR].total + player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
+		player[PLYR].total += player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
 		
 	else
-		player[PLYM].total = player[PLYM].total + player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
+		player[PLYM].total +=  player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
 		
-	printf("Player who moved is: %d\n", PLYM);
+	printf("\nPlayer who moved is: %d\n", PLYM);
 	printf("Player who replied is: %d\n", PLYR);
 	printf("Card index played is: %d\n", indexM);
 	printf("Card index replayed is: %d\n", indexR);
@@ -193,7 +181,7 @@ void assign_points (struct player_data *player) {
 	printf("Total Points PLY1: %d\n", player[PLY1].total);
 	printf("Winner is: %d\n", table.winner);
 	printf("Player M hand points: %d\n", player[PLYM].card[indexM]->value);
-	printf("Player R hand points: %d\n\n\n", player[PLYR].card[indexR]->value);
+	printf("Player R hand points: %d\n", player[PLYR].card[indexR]->value);
 		
 	table.turn = table.winner;
 		
@@ -203,21 +191,27 @@ void assign_points (struct player_data *player) {
 	
 	table.cards_dealt += 2;
 	
-	g_timeout_add(2000, (GSourceFunc)clean_table, player);
-	
-	if (table.turn == PLY1)
-		move(&player[PLY1]);
-	else
-		table.status = PLAY;
+	g_timeout_add(3000, (GSourceFunc)clean_table, player);
 }
 
 gboolean clean_table (struct player_data *player) {
 
+	/* Hide card played */
+	
 	gtk_widget_hide(table.played_card[PLY0]);
 	gtk_widget_hide(table.played_card[PLY1]);
 		
 	printf("Table status %d\n", table.status);
 	gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
+	
+	/* Set the new card for PLY0 */
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
+	gtk_widget_show(table.PLY0_image[player[PLY0].slot]);
+	
+	if (table.turn == PLY1)
+		move(&player[PLY1]);
+	else
+		table.status = PLAY;
 
 	return FALSE;
 }
@@ -238,17 +232,6 @@ void draw_cards (struct player_data *player) {
 		player[PLY0].card[index0] = &deck[table.cards_dealt+1];
 		player[PLY1].card[index1] = &deck[table.cards_dealt];
 	}
-	
-	/* Set the new card for PLY0 */
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[index0]->file);
-
-	/* Display the cards */
-	gtk_widget_show(table.PLY0_image[index0]);
-	gtk_widget_show(table.PLY1_covered[index1]);
-	
-	/* Hide played cards */
-	gtk_widget_hide(table.played_card[PLY0]);
-	gtk_widget_hide(table.played_card[PLY1]);
 }
 
 int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min else max */
@@ -293,11 +276,36 @@ int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min 
 	return index;
 }
 
-void update_points(struct player_data *player, int index) {
+int find_charge(struct player_data *player) {
 
-	char *display;
-    display = g_strdup_printf("%d", player[index].total);					/* convert num to str */
-    gtk_label_set_text (GTK_LABEL(table.label_player[index]), display);		/* set label to "display */
-    
-    g_free(display);
+	int i;
+	
+	for (i = 0; i < 3; i++) {
+		if (player[PLY1].card[i]->suit == player[PLY0].card[player[PLY0].slot]->suit)
+			if(player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].slot]->value)
+				return i;
+	}
+		
+	return -1;
+}
+
+void display_cards (struct player_data *player) {
+
+	/* Player's cards */
+	
+	table.PLY0_image[0] = gtk_image_new_from_file (player[PLY0].card[0]->file);
+	table.PLY0_image[1] = gtk_image_new_from_file (player[PLY0].card[1]->file);
+	table.PLY0_image[2] = gtk_image_new_from_file (player[PLY0].card[2]->file);
+	
+	/* Image of Dealer's covered cards */
+  	
+	table.PLY1_covered[0] = gtk_image_new_from_file ("c/back.png");
+	table.PLY1_covered[1] = gtk_image_new_from_file ("c/back.png");
+	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
+  		
+	/* Images for Briscola and deck */
+	  	
+  	table.image_briscola = gtk_image_new_from_file (deck[39].file);
+	
+  	table.image_deck_pile = gtk_image_new_from_file ("c/deck.png");
 }
