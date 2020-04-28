@@ -39,10 +39,7 @@ void create_window() {
 	gtk_css_provider_load_from_path (css_provider, "style.css", NULL);
   		
 	GdkScreen *myScreen = gdk_screen_get_default();
-	gtk_style_context_add_provider_for_screen
-		    (myScreen,
-            GTK_STYLE_PROVIDER (css_provider),
-            GTK_STYLE_PROVIDER_PRIORITY_USER);
+	gtk_style_context_add_provider_for_screen (myScreen, GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
             
    	/*get_number_players(window);*/
    	

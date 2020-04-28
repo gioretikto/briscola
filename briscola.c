@@ -24,6 +24,7 @@ void init_game(struct player_data *player) {
 	
 	table.cards_dealt = 6;
 	memset(table.memo, 0, 4 * sizeof(table.memo));
+	
 	table.hand = 1;
 	
 	player[PLY0].total = 0;
@@ -179,11 +180,11 @@ void assign_points (struct player_data *player) {
 		player[PLYR].total += player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
 		
 	else
-		player[PLYM].total +=  player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
+		player[PLYM].total += player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
 		
 	update_points(&player[table.winner], table.winner);
 		
-	if (player[PLY0].total + player[PLY1].total == 120)
+	if ( (player[PLY0].total + player[PLY1].total) == 120)
 		print_end_msg(player);
 	
 	printf("Player who moved is: %d\n", PLYM);
@@ -194,37 +195,34 @@ void assign_points (struct player_data *player) {
 		
 	table.turn = table.winner;
 	
-	g_timeout_add(1000, (GSourceFunc)clean_table, player);
-}
-
-gboolean clean_table (struct player_data *player) {
-
-	if (table.cards_dealt <= CARDS-2) {	
-		draw_cards(player);
-		gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
+	g_timeout_add(3000, (GSourceFunc)clean_table, player);
+	
+	gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
 		
-		/* Set the new card for PLY0 */
-		gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
-		gtk_widget_show(table.PLY0_image[player[PLY0].slot]);
-	}
-	
-	else {
-		gtk_widget_hide(table.PLY1_covered[player[PLY1].slot]);
-	}
-	
-	update_cards_left();
-	
-	/* Hide card played */	
-	
-	gtk_widget_hide(table.played_card[PLY0]);
-	gtk_widget_hide(table.played_card[PLY1]);
-	
-	table.hand++;
+	/* Set the new card for PLY0 */
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
+	gtk_widget_show(table.PLY0_image[player[PLY0].slot]);
 	
 	if (table.turn == PLY1)
 		move(&player[PLY1]);
 	else
 		table.status = PLAY;
+}
+
+gboolean clean_table (struct player_data *player) {
+
+	if (table.cards_dealt <= CARDS-2) {
+		draw_cards(player);
+		update_cards_left();
+
+	}
+	
+	/* Hide card played */
+	
+	gtk_widget_hide(table.played_card[PLY0]);
+	gtk_widget_hide(table.played_card[PLY1]);
+	
+	table.hand++;
 
 	return FALSE;
 }
@@ -243,14 +241,14 @@ void draw_cards (struct player_data *player) {
 	
 	else {
 		player[PLY1].card[index1] = &deck[table.cards_dealt];
-		player[PLY0].card[index0] = &deck[table.cards_dealt+1];		
+		player[PLY0].card[index0] = &deck[table.cards_dealt+1];	
 	}
 	
 	table.cards_dealt += 2;
 	
 	if (table.cards_dealt == CARDS) {
 		gtk_widget_hide(table.image_briscola);
-		gtk_widget_hide(table.image_deck_pile);	
+		gtk_widget_hide(table.image_deck_pile);
 	}
 }
 
