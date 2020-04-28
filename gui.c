@@ -17,12 +17,13 @@ void create_window() {
    	event_box1 = gtk_event_box_new ();
    	event_box2 = gtk_event_box_new ();
 	event_box3 = gtk_event_box_new ();
-	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);   
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     hbox_dealer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);
     hbox_table = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-    hbox_player = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);   
+    hbox_player = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);
     table.label_player[PLY0] = gtk_label_new ("0");
     table.label_player[PLY1] = gtk_label_new ("0");
+    table.lbl_cards_left = gtk_label_new ("36");
     
    	/* Images for cards played */
    	table.played_card[PLY0] = gtk_image_new ();
@@ -63,6 +64,7 @@ void create_window() {
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.label_player[PLY1]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_briscola);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_deck_pile);
+	gtk_container_add(GTK_CONTAINER (hbox_table), table.lbl_cards_left);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[0]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[1]);
 	gtk_container_add(GTK_CONTAINER (hbox_player), event_box1);
@@ -78,15 +80,18 @@ void create_window() {
 	gtk_style_context_add_class(context1, "my_hbox_player");
 	
 	GtkStyleContext *context2;
-	context2 = gtk_widget_get_style_context(hbox_dealer);			/* Apply style to dealer's box */
+	context2 = gtk_widget_get_style_context(hbox_dealer);				/* Apply style to dealer's box */
 	gtk_style_context_add_class(context2, "my_hbox_dealer");
 	
 	GtkStyleContext *context3;
-	context3 = gtk_widget_get_style_context(hbox_table);			/* Apply style to card displayed on tables */
+	context3 = gtk_widget_get_style_context(hbox_table);				/* Apply style to card displayed on tables */
 	gtk_style_context_add_class(context3, "my_hbox_table");
+	
+	GtkStyleContext *context4;
+	context4 = gtk_widget_get_style_context(table.lbl_cards_left);		/* Apply style to card displayed on tables */
+	gtk_style_context_add_class(context4, "my_lbl_msg");
 
 	gtk_widget_set_name (table.played_card[0], "card_played1");
-
 	
 	g_signal_connect (about_button, "clicked", G_CALLBACK (activate_about), NULL);
 	g_signal_connect (G_OBJECT (event_box1), "button_press_event", G_CALLBACK (card1_clicked), player);
@@ -111,7 +116,7 @@ void card1_clicked (GtkWidget *event_box1, GdkEventButton *event, struct player_
 		player[PLY0].slot = 0;
 		
 		/* Hide played card */
-		gtk_widget_hide(table.PLY0_image[0]);		
+		gtk_widget_hide(table.PLY0_image[0]);	
 	
 		if (table.turn == PLY0)
 			move_reply(player);
@@ -163,7 +168,7 @@ void card3_clicked (GtkWidget *event_box3, GdkEventButton *event, struct player_
 			
 		else {
 			gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
-			gtk_widget_show(table.played_card[1]);	
+			gtk_widget_show(table.played_card[1]);
 			assign_points(player);
 		}
 	}
@@ -171,13 +176,40 @@ void card3_clicked (GtkWidget *event_box3, GdkEventButton *event, struct player_
 
 void update_points(struct player_data *player, int index) {
 
-	printf("\n\nIndex Update: %d\n", index);
-
 	char *display;
-    display = g_strdup_printf("%d", player[index].total);					/* convert num to str */
+    display = g_strdup_printf("%d", player->total);							/* convert num to str */
     gtk_label_set_text (GTK_LABEL(table.label_player[index]), display);		/* set label to "display */
     
     g_free(display);
+}
+
+void update_cards_left() {
+
+    if (CARDS - table.cards_dealt == 0)
+    	gtk_label_set_text(GTK_LABEL(table.lbl_cards_left), "");
+    	
+    else {
+    	char *display;
+        display = g_strdup_printf("%d", CARDS - table.cards_dealt);
+    	gtk_label_set_text (GTK_LABEL(table.lbl_cards_left), display);		/* set label to "display */
+   	    g_free(display);
+    }  
+
+}
+
+void print_end_msg(struct player_data *player) {
+	
+	char *display;
+	
+	if (player[PLY0].total > player[PLY1].total)
+	    display = g_strdup_printf("Congratulation you win %d to %d", player[PLY0].total, player[PLY1].total);
+	else
+		display = g_strdup_printf("You loose %d to %d", player[PLY0].total, player[PLY1].total);
+		
+    gtk_label_set_text (GTK_LABEL(table.lbl_cards_left), display);
+    
+    g_free(display);
+
 }
 
 void destroy (GtkWidget *window, gpointer data)

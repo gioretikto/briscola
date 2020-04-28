@@ -1,3 +1,5 @@
+Briscola
+**************
 
 
 RULES
@@ -11,3 +13,6 @@ Cavallo (King)			4 points
 Donna (2) Queen			3 points
 Fante (Jack or Valet)	2 points
 7, 6, 5, 4, 2 			0 points
+
+
+The total value of cards in the deck adds up to 120 points. The player (or team) which scores at least 61 points in a game wins.

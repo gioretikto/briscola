@@ -23,6 +23,8 @@ void init_game(struct player_data *player) {
 	player[PLY1].card[2] = &deck[5];
 	
 	table.cards_dealt = 6;
+	memset(table.memo, 0, 4 * sizeof(int));
+	table.hand = 1;
 	
 	player[PLY0].total = 0;
 	player[PLY1].total = 0;
@@ -34,7 +36,10 @@ void move(struct player_data *player) {
 
 	int i;
 	
-	i = min_max(player, 0);
+	for (i = 0; i < 3; i++)
+	 	printf("Cards %d: value %d , suit %d\n", i+1, player[PLY1].card[i]->value, player[PLY1].card[i]->suit);
+	
+	i = min_max(player, 0, -1);
 	player->slot = i;
 		
 	gtk_widget_hide(table.PLY1_covered[i]);
@@ -53,49 +58,41 @@ void move_reply(struct player_data *player) {
 	int i;
 	int tmp;
 	int index = player[PLY0].slot;
-		
+	
 	for (i = 0; i < 3; i++)
-	 	printf("value %d , suit %d\n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit);
+	 	printf("Cards %d: value %d , suit %d\n", i+1, player[PLY1].card[i]->value, player[PLY1].card[i]->suit);
 	
 	i = 0;
 	
-	if (player[PLY0].card[index]->value == 0) {
+	if (player[PLY0].card[index]->suit != table.briscola) {
 	
-		if (player[PLY0].card[index]->suit != table.briscola) {
-			if (find_charge(player) != -1)
+		if (find_charge(player) != -1)
 				i = find_charge(player);		
-			else
-				i = min_max(&player[1], 0);				/* if it is a scartina reply with another scartina */
-		}		
-	}
+		else
+				i = min_max(&player[1], 0, 1);				/* if it is a scartina reply with another scartina */
+	}		
 	
 	/* if it is an ace or three or 10 */
 	else if ( (player[PLY0].card[index]->value == 11) || (player[PLY0].card[index]->value == 10) || (player[PLY0].card[index]->value == 4) ) {
 		
 		if (player[PLY0].card[index]->suit != table.briscola) { /* try to take with a card of min value 0, else with another card */
 			
-			tmp = i = min_max(&player[PLY1], 0); 
+			tmp = min_max(&player[PLY1], 0, 1); 
 				
-			if (player[PLY1].card[i]->value < player[PLY0].card[index]->value) { 	   /* if the min value cannot overtake*/
-				i = min_max(&player[1], 1);   /* try with max */
-				
-				if (player[PLY1].card[i]->value > player[PLY0].card[index]->value)	   /* Try to see if the max value can do it */
-					;
-				else 			/* if not even the max can take use the min card */
+			if (player[PLY1].card[tmp]->value > player[PLY0].card[index]->value) 	   /* if the min value cannot overtake*/			
+				i = tmp;
+			
+			else {
+				tmp = min_max(&player[1], 1, 1);   /* try with max */
+						
+				if (player[PLY1].card[tmp]->value > player[PLY0].card[index]->value)   /* Try to see if the max value can do it */
 					i = tmp;
 			}
-		}
-		
-	else {
-		i = min_max(&player[PLY1], 1); 		/* Try to see if the max value can overtake ace or 3*/
-				
-		if (player[PLY1].card[i]->value < player[PLY0].card[index]->value)
-			i = min_max(&player[PLY1], 0); 	/* If not Play the card with lowest value */
-		}
+		}		
 	}
 	
 	else
-		i = min_max(&player[1], 0);
+		i = min_max(&player[1], 0, 1);
 	
 	player[PLY1].slot = i;
 	
@@ -103,8 +100,16 @@ void move_reply(struct player_data *player) {
 	gtk_widget_hide(table.PLY1_covered[i]);
 	
 	printf("Briscola: %d\n", table.briscola);
- 	printf("Played: value %d, suit %d, Index: %d \n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit, index);
- 	printf("Reply: value %d, suit %d, Index: %d \n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, player[PLY1].slot);
+ 	printf("Played: value %d, suit %d, Index: %d\n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit, index);
+ 	printf("Reply: value %d, suit %d, Index: %d\n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, player[PLY1].slot);
+ 	
+ 	if (player[PLY0].card[index]->suit != table.briscola)
+ 		if(player[PLY0].card[index]->value == 10 || player[PLY0].card[index]->value == 11)
+ 			table.memo[player[PLY0].card[index]->suit]++;
+ 			
+ 	if (player[PLY1].card[i]->suit != table.briscola)
+ 		if(player[PLY1].card[i]->value == 10 || player[PLY1].card[i]->value == 11)
+ 			table.memo[player[PLY1].card[i]->suit]++;
 	
 	/* Move card played by PLY1 on the table */
 	
@@ -112,10 +117,13 @@ void move_reply(struct player_data *player) {
 	gtk_widget_show(table.played_card[PLY1]);
 	
 	/* Assign points of the hand */
-	assign_points(player);	
+	assign_points(player);
 }
 
 void assign_points (struct player_data *player) {
+
+	printf("Hand: %d\n", table.hand);
+	printf("Cards dealt: %d\n", table.cards_dealt);
 
 	int PLYM;		/* Player who moved */
 	int PLYR;		/* Player replying */
@@ -172,43 +180,47 @@ void assign_points (struct player_data *player) {
 		
 	else
 		player[PLYM].total +=  player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
-		
-	printf("\nPlayer who moved is: %d\n", PLYM);
+	
+	printf("Player who moved is: %d\n", PLYM);
 	printf("Player who replied is: %d\n", PLYR);
-	printf("Card index played is: %d\n", indexM);
-	printf("Card index replayed is: %d\n", indexR);
 	printf("Total Points PLY0: %d\n", player[PLY0].total);
 	printf("Total Points PLY1: %d\n", player[PLY1].total);
-	printf("Winner is: %d\n", table.winner);
-	printf("Player M hand points: %d\n", player[PLYM].card[indexM]->value);
-	printf("Player R hand points: %d\n", player[PLYR].card[indexR]->value);
+	printf("Winner is: %d\n\n", table.winner);
 		
 	table.turn = table.winner;
-		
-	update_points(&player[table.winner], table.winner);
-		
-	draw_cards(player);
 	
-	table.cards_dealt += 2;
-	
-	g_timeout_add(3000, (GSourceFunc)clean_table, player);
+	g_timeout_add(1000, (GSourceFunc)clean_table, player);
 }
 
 gboolean clean_table (struct player_data *player) {
 
-	/* Hide card played */
+	if (table.cards_dealt < CARDS) {	
+		draw_cards(player);
+		gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
+		
+		/* Set the new card for PLY0 */
+		gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
+		gtk_widget_show(table.PLY0_image[player[PLY0].slot]);
+	}
+	
+	else {
+		gtk_widget_hide(table.PLY1_covered[player[PLY1].slot]);
+	}	 
+
+	update_points(&player[table.winner], table.winner);
+	update_cards_left();
+	
+	/* Hide card played */	
 	
 	gtk_widget_hide(table.played_card[PLY0]);
 	gtk_widget_hide(table.played_card[PLY1]);
-		
-	printf("Table status %d\n", table.status);
-	gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
 	
-	/* Set the new card for PLY0 */
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
-	gtk_widget_show(table.PLY0_image[player[PLY0].slot]);
+	table.hand++;
 	
-	if (table.turn == PLY1)
+	if (player[PLY0].total + player[PLY1].total == 120)
+		print_end_msg(player);
+	
+	else if (table.turn == PLY1)
 		move(&player[PLY1]);
 	else
 		table.status = PLAY;
@@ -229,12 +241,19 @@ void draw_cards (struct player_data *player) {
 	}
 	
 	else {
-		player[PLY0].card[index0] = &deck[table.cards_dealt+1];
 		player[PLY1].card[index1] = &deck[table.cards_dealt];
+		player[PLY0].card[index0] = &deck[table.cards_dealt+1];		
+	}
+	
+	table.cards_dealt += 2;
+	
+	if (table.cards_dealt == CARDS) {
+		gtk_widget_hide(table.image_briscola);
+		gtk_widget_hide(table.image_deck_pile);	
 	}
 }
 
-int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min else max */
+int min_max (struct player_data *player, _Bool s, int m) { 	/* if s == 0 calculate min else max */
 
 	int i, index;
 	int a[3];
@@ -249,6 +268,9 @@ int min_max (struct player_data *player, _Bool s) { 	/* if s == 0 calculate min 
 			else
 				a[i] += 1;
 		}
+		
+		if (player->card[i]->suit != table.briscola)
+			a[i] = a[i] + m * table.memo[player->card[i]->suit];
 	}
 	
 	index = 0;
@@ -282,7 +304,7 @@ int find_charge(struct player_data *player) {
 	
 	for (i = 0; i < 3; i++) {
 		if (player[PLY1].card[i]->suit == player[PLY0].card[player[PLY0].slot]->suit)
-			if(player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].slot]->value)
+			if (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].slot]->value)
 				return i;
 	}
 		
