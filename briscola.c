@@ -23,7 +23,7 @@ void init_game(struct player_data *player) {
 	player[PLY1].card[2] = &deck[5];
 	
 	table.cards_dealt = 6;
-	memset(table.memo, 0, 4 * sizeof(int));
+	memset(table.memo, 0, 4 * sizeof(table.memo));
 	table.hand = 1;
 	
 	player[PLY0].total = 0;
@@ -180,6 +180,11 @@ void assign_points (struct player_data *player) {
 		
 	else
 		player[PLYM].total +=  player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
+		
+	update_points(&player[table.winner], table.winner);
+		
+	if (player[PLY0].total + player[PLY1].total == 120)
+		print_end_msg(player);
 	
 	printf("Player who moved is: %d\n", PLYM);
 	printf("Player who replied is: %d\n", PLYR);
@@ -194,7 +199,7 @@ void assign_points (struct player_data *player) {
 
 gboolean clean_table (struct player_data *player) {
 
-	if (table.cards_dealt < CARDS) {	
+	if (table.cards_dealt <= CARDS-2) {	
 		draw_cards(player);
 		gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
 		
@@ -205,9 +210,8 @@ gboolean clean_table (struct player_data *player) {
 	
 	else {
 		gtk_widget_hide(table.PLY1_covered[player[PLY1].slot]);
-	}	 
-
-	update_points(&player[table.winner], table.winner);
+	}
+	
 	update_cards_left();
 	
 	/* Hide card played */	
@@ -217,10 +221,7 @@ gboolean clean_table (struct player_data *player) {
 	
 	table.hand++;
 	
-	if (player[PLY0].total + player[PLY1].total == 120)
-		print_end_msg(player);
-	
-	else if (table.turn == PLY1)
+	if (table.turn == PLY1)
 		move(&player[PLY1]);
 	else
 		table.status = PLAY;

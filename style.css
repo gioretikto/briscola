@@ -9,7 +9,7 @@ window {
 }
 
 .my_hbox_table {
-	margin-left: 40px;
+	margin-left: 10px;
 }
 
 .my_hbox_player {
@@ -21,6 +21,12 @@ window {
 
 #card_played1 {
 
-	margin-left: 100px;
+	margin-left: 120px;
 	margin-right: 20px;
+}
+
+.my_lbl_msg{
+	margin-left: 20px;
+	font-size: 25px;
+	margin: 5px;
 }

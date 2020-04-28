@@ -139,7 +139,6 @@ void card2_clicked (GtkWidget *event_box2, GdkEventButton *event, struct player_
 		
 		/* Hide played card */
 		gtk_widget_hide(table.PLY0_image[1]);
-
 		
 		if (table.turn == PLY0)
 			move_reply(player);
