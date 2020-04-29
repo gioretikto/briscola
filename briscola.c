@@ -1,6 +1,6 @@
 #include "briscola.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 
 extern struct card deck[40];
