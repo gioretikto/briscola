@@ -23,7 +23,7 @@ void create_window() {
     hbox_player = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);
     table.label_player[PLY0] = gtk_label_new ("0");
     table.label_player[PLY1] = gtk_label_new ("0");
-    table.lbl_cards_left = gtk_label_new ("36");
+    table.lbl_cards_left = gtk_label_new ("");
     
    	/* Images for cards played */
    	table.played_card[PLY0] = gtk_image_new ();
@@ -106,68 +106,20 @@ void create_window() {
 
 void card1_clicked (GtkWidget *event_box1, GdkEventButton *event, struct player_data *player) {
 		
-	if (table.status == PLAY) {
-	
-		table.status = BLOCK;
-		
-		player[PLY0].slot = 0;
-		
-		/* Hide played card */
-		gtk_widget_hide(table.PLY0_image[0]);	
-	
-		if (table.turn == PLY0)
-			move_reply(player);
-			
-		else {
-			gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
-			gtk_widget_show(table.played_card[1]);	
-			assign_points(player);
-		}		
-	}
+	if (table.status == PLAY)
+		ply0_move(0, player);
 }
 
 void card2_clicked (GtkWidget *event_box2, GdkEventButton *event, struct player_data *player) {
 
-	if (table.status == PLAY) {
-	
-		table.status = BLOCK;
-
-		player[PLY0].slot = 1;
-		
-		/* Hide played card */
-		gtk_widget_hide(table.PLY0_image[1]);
-		
-		if (table.turn == PLY0)
-			move_reply(player);
-			
-		else {
-			gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
-			gtk_widget_show(table.played_card[1]);	
-			assign_points(player);
-		}
-	}
+	if (table.status == PLAY)
+		ply0_move(1, player);
 }
 
 void card3_clicked (GtkWidget *event_box3, GdkEventButton *event, struct player_data *player) {
 
-	if (table.status == PLAY) {
-	
-		table.status = BLOCK;
-	
-		player[PLY0].slot = 2;
-		
-		/* Hide played card */
-		gtk_widget_hide(table.PLY0_image[2]);
-
-		if (table.turn == PLY0)
-			move_reply(player);
-			
-		else {
-			gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
-			gtk_widget_show(table.played_card[1]);
-			assign_points(player);
-		}
-	}
+	if (table.status == PLAY)
+		ply0_move(2, player);
 }
 
 void update_points(struct player_data *player, int index) {
@@ -181,16 +133,10 @@ void update_points(struct player_data *player, int index) {
 
 void update_cards_left() {
 
-    if (CARDS - table.cards_dealt == 0)
-    	gtk_label_set_text(GTK_LABEL(table.lbl_cards_left), "");
-    	
-    else {
-    	char *display;
-        display = g_strdup_printf("%d", CARDS - table.cards_dealt);
-    	gtk_label_set_text (GTK_LABEL(table.lbl_cards_left), display);		/* set label to "display */
-   	    g_free(display);
-    }  
-
+   	char *display;
+    display = g_strdup_printf("%d", CARDS - table.cards_dealt);
+    gtk_label_set_text (GTK_LABEL(table.lbl_cards_left), display);		/* set label to "display */
+	g_free(display);
 }
 
 void print_end_msg(struct player_data *player) {
@@ -206,6 +152,21 @@ void print_end_msg(struct player_data *player) {
     
     g_free(display);
 
+}
+
+void display_first_hand (struct player_data *player) {
+
+	/* Player's cards */
+	
+	table.PLY0_image[0] = gtk_image_new_from_file (player[PLY0].card[0]->file);
+	table.PLY0_image[1] = gtk_image_new_from_file (player[PLY0].card[1]->file);
+	table.PLY0_image[2] = gtk_image_new_from_file (player[PLY0].card[2]->file);
+	
+	/* Image of Dealer's covered cards */
+  	
+	table.PLY1_covered[0] = gtk_image_new_from_file ("c/back.png");
+	table.PLY1_covered[1] = gtk_image_new_from_file ("c/back.png");
+	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
 }
 
 void destroy (GtkWidget *window, gpointer data)
