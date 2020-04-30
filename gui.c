@@ -13,8 +13,8 @@ void create_window() {
         
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	headbar = gtk_header_bar_new();
-	about_button = gtk_button_new_with_mnemonic("_About");
-	table.play_button = gtk_button_new_with_mnemonic("Play Again");
+	about_button = gtk_button_new_with_label("_About");
+	table.play_button = gtk_button_new_with_label("Play Again");
    	event_box[0] = gtk_event_box_new ();
    	event_box[1] = gtk_event_box_new ();
 	event_box[2] = gtk_event_box_new ();
@@ -180,7 +180,7 @@ void display_first_hand (struct player_data *player) {
 void activate_about(void) {
 
 	const gchar *authors[] = {"Giovanni Resta", "giovannirestadev@gmail.com", NULL};
-
+	
 	gtk_show_about_dialog (NULL,
                        "program-name", "Briscola",
                        "version", "0.0.1",
@@ -190,7 +190,8 @@ void activate_about(void) {
     				   "logo-icon-name", "start-here",
     				   "comments", "reach me on #cansi Freenode IRC",
                        "title", ("Briscola"),
-                       NULL);
+                       NULL);                   
+
 }
 
 void destroy (GtkWidget *window G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
