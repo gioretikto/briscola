@@ -54,7 +54,6 @@ void init_game(struct player_data *player);
 void ply0_move(unsigned int index, struct player_data *player);
 void move_reply(struct player_data *player);
 void update_points(struct player_data *player, int index);
-void display_first_hand (struct player_data *player);
 unsigned int min_max (struct player_data *player, _Bool s, int m);
 void assign_points(struct player_data *player);
 void draw_cards(struct player_data *player);

@@ -23,6 +23,10 @@ void init_game(struct player_data *player) {
 	player[PLY1].card[1] = &deck[4];
 	player[PLY1].card[2] = &deck[5];
 	
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[0]), player[PLY0].card[0]->file);
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[1]), player[PLY0].card[1]->file);
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[2]), player[PLY0].card[2]->file);
+	
 	gtk_image_set_from_file(GTK_IMAGE(table.image_briscola), deck[CARDS-1].file);
 	
 	table.cards_dealt = 6;
@@ -35,7 +39,6 @@ void init_game(struct player_data *player) {
 	player[PLY0].total = 0;
 	player[PLY1].total = 0;
 	
-	display_first_hand(player);
 }
 
 void ply0_move(unsigned int index, struct player_data *player) {
@@ -73,7 +76,7 @@ void move(struct player_data *player) {
 		gtk_widget_hide(table.PLY1_covered[2]);
 		
 	else if (table.hand == 19)
-			gtk_widget_hide(table.PLY1_covered[1]);
+		gtk_widget_hide(table.PLY1_covered[1]);
 			
 	else
 		gtk_widget_hide(table.PLY1_covered[i]);
@@ -137,7 +140,7 @@ void move_reply(struct player_data *player) {
 		gtk_widget_hide(table.PLY1_covered[2]);
 		
 	else if (table.hand == 19)
-			gtk_widget_hide(table.PLY1_covered[1]);
+		gtk_widget_hide(table.PLY1_covered[1]);
 			
 	else 
 		gtk_widget_hide(table.PLY1_covered[i]);

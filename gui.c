@@ -31,15 +31,17 @@ void create_window() {
    	table.played_card[1] = gtk_image_new ();
 
 	table.image_deck_pile = gtk_image_new_from_file ("c/deck.png");
+	
+	/* Image of Dealer's covered cards */
+	table.PLY1_covered[0] = gtk_image_new_from_file ("c/back.png");
+	table.PLY1_covered[1] = gtk_image_new_from_file ("c/back.png");
+	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
+	
 	table.image_briscola = gtk_image_new ();
 	
 	table.PLY0_image[0] = gtk_image_new();
 	table.PLY0_image[1] = gtk_image_new();
 	table.PLY0_image[2] = gtk_image_new();
-	
-	table.PLY1_covered[0] = gtk_image_new();
-	table.PLY1_covered[1] = gtk_image_new();
-	table.PLY1_covered[2] = gtk_image_new();
             	
     gtk_header_bar_set_title (GTK_HEADER_BAR (headbar), "Briscola");
     gtk_window_set_title (GTK_WINDOW (window), "Briscola");    
@@ -107,7 +109,7 @@ void create_window() {
 	gtk_widget_hide(table.played_card[PLY0]);
 	gtk_widget_hide(table.played_card[PLY1]);
 	
-		/* initialize first hand */
+	/* initialize first hand */
 	  	
 	init_game(player);
 
@@ -167,21 +169,6 @@ void end_game(struct player_data *player) {
     gtk_label_set_text(GTK_LABEL(table.lbl_cards_left), display);
     
     g_free(display);
-}
-
-void display_first_hand (struct player_data *player) {
-
-	/* Player's cards */
-	
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[0]), player[PLY0].card[0]->file);
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[1]), player[PLY0].card[1]->file);
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[2]), player[PLY0].card[2]->file);
-	
-	/* Image of Dealer's covered cards */
-  	
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY1_covered[0]), "c/back.png");
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY1_covered[1]), "c/back.png");
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY1_covered[2]), "c/back.png");
 }
 
 void activate_about(void) {
