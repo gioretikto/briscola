@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -std=c99 -ggdb3 -Wall -pedantic `pkg-config --cflags --libs gtk+-3.0` -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wconversion
+CFLAGS = -std=c99 -W -Wextra -Werror -ggdb3 -Wall -pedantic `pkg-config --cflags --libs gtk+-3.0` -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wconversion
 CFLAGS+= -D__EXTENSIONS__
 LDLIBS = `pkg-config --libs gtk+-3.0`
-SRCS = main.c deck.c gui.c briscola.c dialogs.c
+SRCS = main.c deck.c gui.c briscola.c
 OBJS = $(SRCS:.c=.o)
 
 briscola: $(OBJS)

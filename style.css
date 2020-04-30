@@ -10,23 +10,27 @@ window {
 
 .my_hbox_table {
 	margin-left: 10px;
+	font-size: 25px;
 }
 
 .my_hbox_player {
-
 	margin-left: 310px;
-	margin-top: 80px;
-	
+	margin-top: 80px;	
 }
 
 #card_played1 {
-
 	margin-left: 120px;
 	margin-right: 20px;
 }
 
-.my_lbl_msg{
-	margin-left: 20px;
-	font-size: 25px;
-	margin: 5px;
+.my_hbox_table button:hover{
+	background-color: green;
+}
+
+.my_hbox_table button{
+  background: none;
+  border: none; box-shadow: none; padding: 0;
+  margin-left: 25px;
+  margin-bottom: 10px;
+  font-size: 50px;
 }

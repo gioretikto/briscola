@@ -46,15 +46,15 @@ struct card	deck[] = {
 	{40, "c/40.png", 4, SPADE}
     };
 
-void shuffle (struct card *deck) {
+void shuffle (struct card *xdeck) {
 
 	int i, j;
 	struct card temp;
 
 	for (i = 0; i < CARDS - 1; i++) {
 	    j = rand() % CARDS; 
-	    temp = deck[j];
-	    deck[j] = deck[i];
-	    deck[i] = temp;
+	    temp = xdeck[j];
+	    xdeck[j] = deck[i];
+	    xdeck[i] = temp;
     }  
 }

@@ -9,14 +9,15 @@ void create_window() {
 	GtkWidget *hbox_table;
     GtkWidget *hbox_player;
     GtkWidget *about_button;
-    GtkWidget *event_box1, *event_box2, *event_box3;
+    GtkWidget *event_box[3];
         
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	headbar = gtk_header_bar_new();
 	about_button = gtk_button_new_with_mnemonic("_About");
-   	event_box1 = gtk_event_box_new ();
-   	event_box2 = gtk_event_box_new ();
-	event_box3 = gtk_event_box_new ();
+	table.play_button = gtk_button_new_with_mnemonic("Play Again");
+   	event_box[0] = gtk_event_box_new ();
+   	event_box[1] = gtk_event_box_new ();
+	event_box[2] = gtk_event_box_new ();
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     hbox_dealer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);
     hbox_table = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -24,10 +25,12 @@ void create_window() {
     table.label_player[PLY0] = gtk_label_new ("0");
     table.label_player[PLY1] = gtk_label_new ("0");
     table.lbl_cards_left = gtk_label_new ("");
-    
+        
    	/* Images for cards played */
    	table.played_card[PLY0] = gtk_image_new ();
 	table.played_card[PLY1] = gtk_image_new ();
+	table.image_deck_pile = gtk_image_new_from_file ("c/deck.png");
+	table.image_briscola = gtk_image_new ();
             	
     gtk_header_bar_set_title (GTK_HEADER_BAR (headbar), "Briscola");
     gtk_window_set_title (GTK_WINDOW (window), "Briscola");    
@@ -41,13 +44,13 @@ void create_window() {
 	GdkScreen *myScreen = gdk_screen_get_default();
 	gtk_style_context_add_provider_for_screen (myScreen, GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
             
-   	/*get_number_players(window);*/
-   	
    	struct player_data player[2];
    	
    	table.turn = PLY0;
    	table.status = PLAY;
    	
+	/* Images for Briscola and deck */
+	  	
 	init_game(player);
 	
     gtk_container_add(GTK_CONTAINER (headbar), about_button);
@@ -62,61 +65,61 @@ void create_window() {
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_briscola);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_deck_pile);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.lbl_cards_left);
+	gtk_container_add(GTK_CONTAINER (hbox_table), table.play_button);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[0]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[1]);
-	gtk_container_add(GTK_CONTAINER (hbox_player), event_box1);
-	gtk_container_add(GTK_CONTAINER (hbox_player), event_box2);
-	gtk_container_add(GTK_CONTAINER (hbox_player), event_box3);
-	gtk_container_add(GTK_CONTAINER (event_box1), table.PLY0_image[0]);
-	gtk_container_add(GTK_CONTAINER (event_box2), table.PLY0_image[1]);
-	gtk_container_add(GTK_CONTAINER (event_box3), table.PLY0_image[2]);
+	gtk_container_add(GTK_CONTAINER (hbox_player), event_box[0]);
+	gtk_container_add(GTK_CONTAINER (hbox_player), event_box[1]);
+	gtk_container_add(GTK_CONTAINER (hbox_player), event_box[2]);
+	gtk_container_add(GTK_CONTAINER (event_box[0]), table.PLY0_image[0]);
+	gtk_container_add(GTK_CONTAINER (event_box[1]), table.PLY0_image[1]);
+	gtk_container_add(GTK_CONTAINER (event_box[2]), table.PLY0_image[2]);
 	gtk_container_add(GTK_CONTAINER (hbox_player), table.label_player[PLY0]);
-	
-	GtkStyleContext *context1;
-	context1 = gtk_widget_get_style_context(hbox_player);			/* Apply style to player's box */
+		
+	GtkStyleContext *context1;										/* Apply style to player's box */
+	context1 = gtk_widget_get_style_context(hbox_player);			
 	gtk_style_context_add_class(context1, "my_hbox_player");
 	
 	GtkStyleContext *context2;
-	context2 = gtk_widget_get_style_context(hbox_dealer);				/* Apply style to dealer's box */
+	context2 = gtk_widget_get_style_context(hbox_dealer);			/* Apply style to dealer's box */
 	gtk_style_context_add_class(context2, "my_hbox_dealer");
 	
 	GtkStyleContext *context3;
-	context3 = gtk_widget_get_style_context(hbox_table);				/* Apply style to card displayed on tables */
+	context3 = gtk_widget_get_style_context(hbox_table);			/* Apply style to card displayed on tables */
 	gtk_style_context_add_class(context3, "my_hbox_table");
-	
-	GtkStyleContext *context4;
-	context4 = gtk_widget_get_style_context(table.lbl_cards_left);		/* Apply style to card displayed on tables */
-	gtk_style_context_add_class(context4, "my_lbl_msg");
 
 	gtk_widget_set_name (table.played_card[0], "card_played1");
 	
 	g_signal_connect (about_button, "clicked", G_CALLBACK (activate_about), NULL);
-	g_signal_connect (G_OBJECT (event_box1), "button_press_event", G_CALLBACK (card1_clicked), player);
-	g_signal_connect (G_OBJECT (event_box2), "button_press_event", G_CALLBACK (card2_clicked), player);
-    g_signal_connect (G_OBJECT (event_box3), "button_press_event", G_CALLBACK (card3_clicked), player);
+	g_signal_connect (G_OBJECT (event_box[0]), "button_press_event", G_CALLBACK (card1_clicked), player);
+	g_signal_connect (G_OBJECT (event_box[1]), "button_press_event", G_CALLBACK (card2_clicked), player);
+    g_signal_connect (G_OBJECT (event_box[2]), "button_press_event", G_CALLBACK (card3_clicked), player);
+    g_signal_connect (G_OBJECT (table.play_button), "button_press_event", G_CALLBACK (init_game), player);
     g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (destroy), NULL);
 	
 	gtk_widget_show_all (window);
-
+	
+	gtk_widget_hide(table.play_button);
+	
 	gtk_widget_hide(table.played_card[PLY0]);
 	gtk_widget_hide(table.played_card[PLY1]);
-	    
+
 	gtk_main();
 }
 
-void card1_clicked (GtkWidget *event_box1, GdkEventButton *event, struct player_data *player) {
+void card1_clicked (GtkWidget *event_box1 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
 		
 	if (table.status == PLAY)
 		ply0_move(0, player);
 }
 
-void card2_clicked (GtkWidget *event_box2, GdkEventButton *event, struct player_data *player) {
-
+void card2_clicked (GtkWidget *event_box2 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
+ 
 	if (table.status == PLAY)
 		ply0_move(1, player);
 }
 
-void card3_clicked (GtkWidget *event_box3, GdkEventButton *event, struct player_data *player) {
+void card3_clicked (GtkWidget *event_box3 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
 
 	if (table.status == PLAY)
 		ply0_move(2, player);
@@ -139,19 +142,24 @@ void update_cards_left() {
 	g_free(display);
 }
 
-void print_end_msg(struct player_data *player) {
+void end_game(struct player_data *player) {
+
+	gtk_widget_show(table.play_button);
 	
 	char *display;
 	
 	if (player[PLY0].total > player[PLY1].total)
 	    display = g_strdup_printf("Congratulation you win %d to %d", player[PLY0].total, player[PLY1].total);
+	    
+	else if (player[PLY0].total == player[PLY1].total)
+		display = g_strdup_printf("The game is a tie %d to %d", player[PLY0].total, player[PLY1].total);
+		
 	else
 		display = g_strdup_printf("You loose %d to %d", player[PLY0].total, player[PLY1].total);
 		
-    gtk_label_set_text (GTK_LABEL(table.lbl_cards_left), display);
+    gtk_label_set_text(GTK_LABEL(table.lbl_cards_left), display);
     
     g_free(display);
-
 }
 
 void display_first_hand (struct player_data *player) {
@@ -169,7 +177,23 @@ void display_first_hand (struct player_data *player) {
 	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
 }
 
-void destroy (GtkWidget *window, gpointer data)
+void activate_about(void) {
+
+	const gchar *authors[] = {"Giovanni Resta", "giovannirestadev@gmail.com", NULL};
+
+	gtk_show_about_dialog (NULL,
+                       "program-name", "Briscola",
+                       "version", "0.0.1",
+    				   "license-type", GTK_LICENSE_GPL_3_0,
+    				   "website", "https://github.com/gioretikto/briscola",
+					   "authors", authors,
+    				   "logo-icon-name", "start-here",
+    				   "comments", "reach me on #cansi Freenode IRC",
+                       "title", ("Briscola"),
+                       NULL);
+}
+
+void destroy (GtkWidget *window G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {	
 	gtk_main_quit ();
 }

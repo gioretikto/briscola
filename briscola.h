@@ -13,7 +13,7 @@ struct player_data {
 
 	int total;				/* total points */
 	struct card *card[3];
-	int slot;				/* card index  */
+	unsigned int slot;				/* card index  */
 	
 };
 
@@ -31,33 +31,35 @@ struct game {
 	GtkWidget *image_briscola, *image_deck_pile;
 	GtkWidget *PLY1_covered[3];
 	GtkWidget *PLY0_image[3];
+    GtkWidget *play_button;
 	enum states status;
 	enum players turn;
 	enum players winner;
 	enum suit briscola;
-	int cards_dealt;
-	int hand;
+	unsigned int cards_dealt;
+	unsigned int hand;
+	unsigned int lim;
 	int memo[4]; 	/* to memorize Aces and 3 played */
 }table;
 
 void create_window(void);
-void destroy (GtkWidget *window, gpointer data);
-void get_number_players (GtkWidget *window);
-void shuffle (struct card *my_game);
-void card1_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_data *player);
-void card2_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_data *player);
-void card3_clicked (GtkWidget *event_box, GdkEventButton *event, struct player_data *player);
 void activate_about(void);
+void destroy (GtkWidget *window G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED);
+void get_number_players (GtkWidget *window);
+void shuffle (struct card *xdeck);
+void card1_clicked (GtkWidget *event_box G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player);
+void card2_clicked (GtkWidget *event_box G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player);
+void card3_clicked (GtkWidget *event_box G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player);
 void init_game(struct player_data *player);
-void ply0_move(int index, struct player_data *player);
+void ply0_move(unsigned int index, struct player_data *player);
 void move_reply(struct player_data *player);
 void update_points(struct player_data *player, int index);
 void display_first_hand (struct player_data *player);
-int min_max (struct player_data *player, _Bool s, int m);
+unsigned int min_max (struct player_data *player, _Bool s, int m);
 void assign_points(struct player_data *player);
 void draw_cards(struct player_data *player);
 void move(struct player_data *player);
 gboolean clean_table (struct player_data *player);
-int find_charge(struct player_data *player);
+unsigned int find_charge(struct player_data *player);
 void update_cards_left(void);
-void print_end_msg(struct player_data *player);
+void end_game(struct player_data *player);

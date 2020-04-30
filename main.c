@@ -19,7 +19,7 @@
  
 int main (int argc, char *argv[])
 {       	
-		srand (time(NULL));
+		srand ((unsigned) time(NULL));
 		
        	gtk_init (&argc, &argv);
        	
