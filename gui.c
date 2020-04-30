@@ -13,7 +13,7 @@ void create_window() {
         
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	headbar = gtk_header_bar_new();
-	about_button = gtk_button_new_with_label("_About");
+	about_button = gtk_button_new_with_label("About");
 	table.play_button = gtk_button_new_with_label("Play Again");
    	event_box[0] = gtk_event_box_new ();
    	event_box[1] = gtk_event_box_new ();
@@ -27,10 +27,19 @@ void create_window() {
     table.lbl_cards_left = gtk_label_new ("");
         
    	/* Images for cards played */
-   	table.played_card[PLY0] = gtk_image_new ();
-	table.played_card[PLY1] = gtk_image_new ();
+   	table.played_card[0] = gtk_image_new ();
+   	table.played_card[1] = gtk_image_new ();
+
 	table.image_deck_pile = gtk_image_new_from_file ("c/deck.png");
 	table.image_briscola = gtk_image_new ();
+	
+	table.PLY0_image[0] = gtk_image_new();
+	table.PLY0_image[1] = gtk_image_new();
+	table.PLY0_image[2] = gtk_image_new();
+	
+	table.PLY1_covered[0] = gtk_image_new();
+	table.PLY1_covered[1] = gtk_image_new();
+	table.PLY1_covered[2] = gtk_image_new();
             	
     gtk_header_bar_set_title (GTK_HEADER_BAR (headbar), "Briscola");
     gtk_window_set_title (GTK_WINDOW (window), "Briscola");    
@@ -49,7 +58,7 @@ void create_window() {
    	table.turn = PLY0;
    	table.status = PLAY;
    	
-	/* Images for Briscola and deck */
+	/* initialize first hand */
 	  	
 	init_game(player);
 	
@@ -166,15 +175,15 @@ void display_first_hand (struct player_data *player) {
 
 	/* Player's cards */
 	
-	table.PLY0_image[0] = gtk_image_new_from_file (player[PLY0].card[0]->file);
-	table.PLY0_image[1] = gtk_image_new_from_file (player[PLY0].card[1]->file);
-	table.PLY0_image[2] = gtk_image_new_from_file (player[PLY0].card[2]->file);
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[0]), player[PLY0].card[0]->file);
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[1]), player[PLY0].card[1]->file);
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[2]), player[PLY0].card[2]->file);
 	
 	/* Image of Dealer's covered cards */
   	
-	table.PLY1_covered[0] = gtk_image_new_from_file ("c/back.png");
-	table.PLY1_covered[1] = gtk_image_new_from_file ("c/back.png");
-	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY1_covered[0]), "c/back.png");
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY1_covered[1]), "c/back.png");
+	gtk_image_set_from_file(GTK_IMAGE(table.PLY1_covered[2]), "c/back.png");
 }
 
 void activate_about(void) {

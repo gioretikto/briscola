@@ -9,7 +9,7 @@ void init_game(struct player_data *player) {
 	
 	shuffle(deck);
 	
-	table.briscola = deck[CARDS-1].suit;		/* the 1st card in deck is briscola */
+	table.briscola = deck[CARDS-1].suit;
 	
 	/* Deal first 6 cards */
 	
@@ -21,7 +21,7 @@ void init_game(struct player_data *player) {
 	player[PLY1].card[1] = &deck[4];
 	player[PLY1].card[2] = &deck[5];
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.image_briscola), deck[39].file);
+	gtk_image_set_from_file(GTK_IMAGE(table.image_briscola), deck[CARDS-1].file);
 	
 	table.cards_dealt = 6;
 	
@@ -133,8 +133,10 @@ void move_reply(struct player_data *player) {
 	
   	if (table.hand == 18)							/* In the last 3 hands start hiding from card 3 */
 		gtk_widget_hide(table.PLY1_covered[2]);
+		
 	else if (table.hand == 19)
 			gtk_widget_hide(table.PLY1_covered[1]);
+			
 	else 
 		gtk_widget_hide(table.PLY1_covered[i]);
 	
