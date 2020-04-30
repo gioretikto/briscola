@@ -57,10 +57,6 @@ void create_window() {
    	
    	table.turn = PLY0;
    	table.status = PLAY;
-   	
-	/* initialize first hand */
-	  	
-	init_game(player);
 	
     gtk_container_add(GTK_CONTAINER (headbar), about_button);
 	gtk_container_add(GTK_CONTAINER (window), vbox);
@@ -108,10 +104,12 @@ void create_window() {
 	
 	gtk_widget_show_all (window);
 	
-	gtk_widget_hide(table.play_button);
-	
 	gtk_widget_hide(table.played_card[PLY0]);
 	gtk_widget_hide(table.played_card[PLY1]);
+	
+		/* initialize first hand */
+	  	
+	init_game(player);
 
 	gtk_main();
 }

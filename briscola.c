@@ -6,6 +6,8 @@
 extern struct card deck[CARDS];
 
 void init_game(struct player_data *player) {
+
+	gtk_widget_hide(table.play_button);
 	
 	shuffle(deck);
 	
