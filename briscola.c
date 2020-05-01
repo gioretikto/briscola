@@ -21,15 +21,15 @@ void init_game(struct player_data *player) {
 	player[PLY1].card[1] = &deck[4];
 	player[PLY1].card[2] = &deck[5];
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[0]), player[PLY0].card[0]->file);
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[1]), player[PLY0].card[1]->file);
-	gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[2]), player[PLY0].card[2]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[0]), player[PLY0].card[0]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[1]), player[PLY0].card[1]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[2]), player[PLY0].card[2]->file);
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.image_briscola), deck[CARDS-1].file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.image_briscola), deck[CARDS-1].file);
 	
 	table.cards_dealt = 6;
 	
-	memset(table.memo, 0, 4 * sizeof(table.memo));
+	memset(table.memo, 0, sizeof(table.memo));
 	
 	table.hand = 1;
 	table.lim = 3;
@@ -62,7 +62,7 @@ void ply0_move(unsigned int index, struct player_data *player) {
 		move_reply(player);
 			
 	else {
-		gtk_image_set_from_file(GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
+		gtk_image_set_from_resource (GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
 		gtk_widget_show(table.played_card[1]);
 		assign_points(player);
 	}
@@ -86,7 +86,7 @@ void move(struct player_data *player) {
 	else
 		gtk_widget_hide(table.PLY1_covered[i]);
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.played_card[0]), player->card[i]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[0]), player->card[i]->file);
 		
 	gtk_widget_show(table.played_card[0]);
 
@@ -95,7 +95,7 @@ void move(struct player_data *player) {
 
 void move_reply(struct player_data *player) {
 
-	gtk_image_set_from_file(GTK_IMAGE(table.played_card[0]), player[PLY0].card[player[PLY0].slot]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[0]), player[PLY0].card[player[PLY0].slot]->file);
 	gtk_widget_show(table.played_card[0]);
 
 	unsigned int i;
@@ -159,7 +159,8 @@ void move_reply(struct player_data *player) {
 	
 	/* Move card played by PLY1 on the table */
 	
-	gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY1]), player[PLY1].card[i]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[PLY1]), player[PLY1].card[i]->file);
+	
 	gtk_widget_show(table.played_card[PLY1]);	
 
 	printf("Played: value %d, suit %d, Index: %d\n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit,  player[PLY0].slot);
@@ -256,11 +257,11 @@ gboolean clean_table (struct player_data *player) {
 		gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
 		
 		/* Set the new card for PLY0 */
-		gtk_image_set_from_file(GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
+		gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
 		gtk_widget_show(table.PLY0_image[player[PLY0].slot]);
 		
-		if (table.hand == 16)
-			gtk_image_set_from_file(GTK_IMAGE(table.image_deck_pile), "c/back.png");
+		if (table.hand == 16) /*when there are only 2 cards left to play pile becomes back */
+			gtk_image_set_from_resource (GTK_IMAGE(table.image_deck_pile), "/cards/back.png");
 	}
 
 	else { /* Do a card shifting to eliminate cards played in last 3 hands*/

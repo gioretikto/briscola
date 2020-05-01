@@ -30,12 +30,12 @@ void create_window() {
    	table.played_card[0] = gtk_image_new();
    	table.played_card[1] = gtk_image_new();
 
-	table.image_deck_pile = gtk_image_new_from_file ("c/deck.png");
+	table.image_deck_pile = gtk_image_new_from_resource ("/cards/deck.png");
 	
 	/* Image of Dealer's covered cards */
-	table.PLY1_covered[0] = gtk_image_new_from_file ("c/back.png");
-	table.PLY1_covered[1] = gtk_image_new_from_file ("c/back.png");
-	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
+	table.PLY1_covered[0] = gtk_image_new_from_resource ("/cards/back.png");
+	table.PLY1_covered[1] = gtk_image_new_from_resource ("/cards/back.png");
+	table.PLY1_covered[2] = gtk_image_new_from_resource ("/cards/back.png");
 
 	table.image_briscola = gtk_image_new();
 	
@@ -60,7 +60,7 @@ void create_window() {
    	table.next_player = PLY0;
    	table.status = BLOCK;
    	
-	memset(table.match_won, 0, 2 * sizeof(table.match_won));
+	memset(table.match_won, 0, sizeof(table.match_won));
 	
     gtk_container_add(GTK_CONTAINER (table.headbar), about_button);
 	gtk_container_add(GTK_CONTAINER (window), vbox);
