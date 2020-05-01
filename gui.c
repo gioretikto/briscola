@@ -1,4 +1,5 @@
 #include "briscola.h"
+#include <string.h>
 
 void create_window() {
 
