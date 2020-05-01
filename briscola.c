@@ -35,7 +35,18 @@ void init_game(struct player_data *player) {
 	table.lim = 3;
 	
 	player[PLY0].total = 0;
-	player[PLY1].total = 0;	
+	player[PLY1].total = 0;
+	
+	if (table.next_player == PLY0) {
+		table.status = PLAY;
+		table.next_player = PLY1;
+	}
+		
+	else {
+		table.status = BLOCK;
+		table.next_player = PLY0;
+		move(&player[PLY1]);		
+	}
 }
 
 void ply0_move(unsigned int index, struct player_data *player) {
@@ -61,9 +72,6 @@ void move(struct player_data *player) {
 
 	unsigned int i;
 	
-	for (i = 0; i < table.lim; i++)
-	 	printf("Card %u: value %d, suit %d\n", i+1, player->card[i]->value, player->card[i]->suit);
- 
 	i = min_max(player, MIN, -1);
 	
 	player->slot = i;
@@ -94,9 +102,6 @@ void move_reply(struct player_data *player) {
 	unsigned int tmp;	
 	unsigned int index = player[PLY0].slot;
 	
-	for (i = 0; i < table.lim; i++)
-	 	printf("Card %u: value %d, suit %d\n", i+1, player[PLY1].card[i]->value, player[PLY1].card[i]->suit);
-	
 	if (player[PLY0].card[index]->suit != table.briscola) {
 	
 		if ((i = find_charge(player)) != 5)
@@ -121,7 +126,7 @@ void move_reply(struct player_data *player) {
 					;
 					
 				else
-					i = tmp;					
+					i = tmp;				
 			}
 	}
 	
@@ -141,10 +146,7 @@ void move_reply(struct player_data *player) {
 	else 
 		gtk_widget_hide(table.PLY1_covered[i]);
 	
-	printf("Briscola: %d\n", table.briscola);
- 	printf("Played: value %d, suit %d, Index: %d\n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit, index);
- 	printf("Reply: value %d, suit %d, Index: %d\n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, player[PLY1].slot);
- 	
+	
  	if (player[PLY0].card[index]->suit != table.briscola) {
  		if (player[PLY0].card[index]->value == 10 || player[PLY0].card[index]->value == 11)
  			table.memo[player[PLY0].card[index]->suit]++;
@@ -158,16 +160,27 @@ void move_reply(struct player_data *player) {
 	/* Move card played by PLY1 on the table */
 	
 	gtk_image_set_from_file(GTK_IMAGE(table.played_card[PLY1]), player[PLY1].card[i]->file);
-	gtk_widget_show(table.played_card[PLY1]);
-	
+	gtk_widget_show(table.played_card[PLY1]);	
+
+	printf("Played: value %d, suit %d, Index: %d\n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit,  player[PLY0].slot);
+ 	printf("Reply: value %d, suit %d, Index: %d\n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, player[PLY1].slot);
+ 	
 	/* Assign points of the hand */
 	assign_points(player);
 }
 
 void assign_points (struct player_data *player) {
 
+	unsigned int i;
+
 	printf("Hand: %d\n", table.hand);
 	printf("Cards dealt: %d\n", table.cards_dealt);
+	printf("Briscola: %d\n", table.briscola);
+	
+	for (i = 0; i < table.lim; i++)
+	 	printf("Card %u: value %d, suit %d\n", i+1, player[PLY1].card[i]->value, player[PLY1].card[i]->suit);
+	 	
+	printf("\n\n");
 
 	enum players PLYM;			/* Player who moved */
 	enum players PLYR;			/* Player replying */
@@ -215,15 +228,13 @@ void assign_points (struct player_data *player) {
 		else
 			table.winner = PLYM;
 	}
-		
+			
 	else
 		table.winner = PLYM;
 
 	/* Assign Points to the winner of the hand*/
 		
 	player[table.winner].total += player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
-		
-	update_points(&player[table.winner], table.winner);
 		
 	printf("Player who moved is: %u\n", PLYM);
 	printf("Player who replied is: %u\n", PLYR);
@@ -238,6 +249,8 @@ void assign_points (struct player_data *player) {
 
 gboolean clean_table (struct player_data *player) {
 
+		update_points(&player[table.winner], table.winner);
+
 	if (table.cards_dealt <= CARDS-2) {
 		draw_cards(player);
 		gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
@@ -250,7 +263,7 @@ gboolean clean_table (struct player_data *player) {
 			gtk_image_set_from_file(GTK_IMAGE(table.image_deck_pile), "c/back.png");
 	}
 
-	else {
+	else { /* Do a card shifting to eliminate cards played in last 3 hands*/
 	
 		if (player[PLY1].slot == 0) {
 			player[PLY1].card[0] = player[PLY1].card[1];
@@ -258,12 +271,10 @@ gboolean clean_table (struct player_data *player) {
 			
 		}
 		
-		if (player[PLY1].slot == 1) {
-			player[PLY1].card[0] = player[PLY1].card[1];
+		if (player[PLY1].slot == 1)
 			player[PLY1].card[1] = player[PLY1].card[2];
-		}
 		
-		table.lim--;			
+		table.lim--;
 	}
 	
 	/* Hide card played */

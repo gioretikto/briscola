@@ -10,11 +10,9 @@ enum choice {MIN, MAX};
 enum players {PLY0, PLY1};
 
 struct player_data {
-
 	int total;				/* total points */
 	struct card *card[3];
-	unsigned int slot;				/* card index  */
-	
+	unsigned int slot;				/* card index  */	
 };
 
 struct card {
@@ -25,7 +23,9 @@ struct card {
 };
 
 struct game {
-	GtkWidget *label_player[2];
+	GtkWidget *headbar;
+	GtkWidget *lbl_points_player[2];
+	GtkWidget *lbl_msg;
 	GtkWidget *lbl_cards_left;
 	GtkWidget *btn_play;
 	GtkWidget *played_card[2];
@@ -36,9 +36,11 @@ struct game {
 	enum players turn;
 	enum players winner;
 	enum suit briscola;
+	unsigned int next_player;
 	unsigned int cards_dealt;
 	unsigned int hand;
 	unsigned int lim;
+	unsigned int match_won[2];
 	int memo[4]; 	/* to memorize Aces and 3 played */
 }table;
 

@@ -3,32 +3,32 @@
 void create_window() {
 
 	GtkWidget *window;
-	GtkWidget *headbar;
     GtkWidget *vbox;
     GtkWidget *hbox_dealer;
 	GtkWidget *hbox_table;
     GtkWidget *hbox_player;
     GtkWidget *about_button;
-    GtkWidget *event_box[3];
+    GtkWidget *event_box[3];    
         
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	headbar = gtk_header_bar_new();
+	table.headbar = gtk_header_bar_new();
 	about_button = gtk_button_new_with_label("About");
-	table.btn_play = gtk_button_new_with_label("Play Again");
-   	event_box[0] = gtk_event_box_new ();
-   	event_box[1] = gtk_event_box_new ();
-	event_box[2] = gtk_event_box_new ();
+	table.btn_play = gtk_button_new_with_label("Start Playing");
+   	event_box[0] = gtk_event_box_new();
+   	event_box[1] = gtk_event_box_new();
+	event_box[2] = gtk_event_box_new();
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     hbox_dealer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);
     hbox_table = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
     hbox_player = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 35);
-    table.label_player[PLY0] = gtk_label_new ("0");
-    table.label_player[PLY1] = gtk_label_new ("0");
+    table.lbl_points_player[PLY0] = gtk_label_new("");
+    table.lbl_points_player[PLY1] = gtk_label_new("");
+    table.lbl_msg = gtk_label_new ("");
     table.lbl_cards_left = gtk_label_new ("");
         
    	/* Images for cards played */
-   	table.played_card[0] = gtk_image_new ();
-   	table.played_card[1] = gtk_image_new ();
+   	table.played_card[0] = gtk_image_new();
+   	table.played_card[1] = gtk_image_new();
 
 	table.image_deck_pile = gtk_image_new_from_file ("c/deck.png");
 	
@@ -36,17 +36,17 @@ void create_window() {
 	table.PLY1_covered[0] = gtk_image_new_from_file ("c/back.png");
 	table.PLY1_covered[1] = gtk_image_new_from_file ("c/back.png");
 	table.PLY1_covered[2] = gtk_image_new_from_file ("c/back.png");
-	
-	table.image_briscola = gtk_image_new ();
+
+	table.image_briscola = gtk_image_new();
 	
 	table.PLY0_image[0] = gtk_image_new();
 	table.PLY0_image[1] = gtk_image_new();
 	table.PLY0_image[2] = gtk_image_new();
             	
-    gtk_header_bar_set_title (GTK_HEADER_BAR (headbar), "Briscola");
+    gtk_header_bar_set_title (GTK_HEADER_BAR (table.headbar), "Briscola");
     gtk_window_set_title (GTK_WINDOW (window), "Briscola");    
-	gtk_window_set_titlebar (GTK_WINDOW (window), headbar);
-	gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (headbar), TRUE);
+	gtk_window_set_titlebar (GTK_WINDOW (window), table.headbar);
+	gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (table.headbar), TRUE);
 	gtk_window_maximize (GTK_WINDOW (window));
 	
 	GtkCssProvider *css_provider = gtk_css_provider_new();		/* Apply style */
@@ -57,10 +57,12 @@ void create_window() {
             
    	struct player_data player[2];
    	
-   	table.turn = PLY0;
-   	table.status = PLAY;
+   	table.next_player = PLY0;
+   	table.status = BLOCK;
+   	
+	memset(table.match_won, 0, 2 * sizeof(table.match_won));
 	
-    gtk_container_add(GTK_CONTAINER (headbar), about_button);
+    gtk_container_add(GTK_CONTAINER (table.headbar), about_button);
 	gtk_container_add(GTK_CONTAINER (window), vbox);
 	gtk_container_add(GTK_CONTAINER (vbox), hbox_dealer);
 	gtk_container_add(GTK_CONTAINER (vbox), hbox_table);
@@ -68,9 +70,10 @@ void create_window() {
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.PLY1_covered[0]);
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.PLY1_covered[1]);
 	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.PLY1_covered[2]);
-	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.label_player[PLY1]);
+	gtk_container_add(GTK_CONTAINER (hbox_dealer), table.lbl_points_player[PLY1]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_briscola);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_deck_pile);
+	gtk_container_add(GTK_CONTAINER (hbox_table), table.lbl_msg);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.lbl_cards_left);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.btn_play);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[0]);
@@ -81,7 +84,7 @@ void create_window() {
 	gtk_container_add(GTK_CONTAINER (event_box[0]), table.PLY0_image[0]);
 	gtk_container_add(GTK_CONTAINER (event_box[1]), table.PLY0_image[1]);
 	gtk_container_add(GTK_CONTAINER (event_box[2]), table.PLY0_image[2]);
-	gtk_container_add(GTK_CONTAINER (hbox_player), table.label_player[PLY0]);
+	gtk_container_add(GTK_CONTAINER (hbox_player), table.lbl_points_player[PLY0]);
 		
 	GtkStyleContext *context1;										/* Apply style to player's box */
 	context1 = gtk_widget_get_style_context(hbox_player);			
@@ -101,23 +104,36 @@ void create_window() {
 	g_signal_connect (G_OBJECT (event_box[0]), "button_press_event", G_CALLBACK (card1_clicked), player);
 	g_signal_connect (G_OBJECT (event_box[1]), "button_press_event", G_CALLBACK (card2_clicked), player);
     g_signal_connect (G_OBJECT (event_box[2]), "button_press_event", G_CALLBACK (card3_clicked), player);
-    g_signal_connect (G_OBJECT (table.btn_play), "button_press_event", G_CALLBACK (init_game), player);
+    g_signal_connect (G_OBJECT (table.btn_play), "clicked", G_CALLBACK (start), player);
     g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (destroy), NULL);
 	
 	gtk_widget_show_all (window);
+	gtk_widget_hide(table.image_deck_pile);
 	
-	gtk_widget_hide(table.btn_play);
+	gtk_widget_hide(table.PLY1_covered[0]);
+	gtk_widget_hide(table.PLY1_covered[1]);
+	gtk_widget_hide(table.PLY1_covered[2]);	
 	
-	init_game(player);
-
 	gtk_main();
 }
 
 void start (GtkWidget *widget G_GNUC_UNUSED, struct player_data *player) {
 
 	gtk_widget_hide(table.btn_play);
+	gtk_widget_hide(table.lbl_msg);	
 	init_game(player);
-
+	
+	gtk_widget_show(table.image_briscola);
+	
+	gtk_widget_show(table.PLY0_image[0]);
+	gtk_widget_show(table.PLY0_image[1]);
+	gtk_widget_show(table.PLY0_image[2]);
+	
+	gtk_widget_show(table.PLY1_covered[0]);
+	gtk_widget_show(table.PLY1_covered[1]);
+	gtk_widget_show(table.PLY1_covered[2]);
+	
+	gtk_widget_show(table.image_deck_pile);
 }
 
 void card1_clicked (GtkWidget *event_box1 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
@@ -141,8 +157,8 @@ void card3_clicked (GtkWidget *event_box3 G_GNUC_UNUSED, GdkEventButton *event G
 void update_points(struct player_data *player, int index) {
 
 	char *display;
-    display = g_strdup_printf("%d", player->total);							/* convert num to str */
-    gtk_label_set_text (GTK_LABEL(table.label_player[index]), display);		/* set label to "display */
+    display = g_strdup_printf("%d", player->total);									/* convert num to str */
+    gtk_label_set_text (GTK_LABEL(table.lbl_points_player[index]), display);		/* set label to "display */
     
     g_free(display);
 }
@@ -157,21 +173,34 @@ void update_cards_left() {
 
 void end_game(struct player_data *player) {
 
+	gtk_widget_show(table.lbl_msg);
+	gtk_button_set_label(GTK_BUTTON(table.btn_play), "Play Again");
 	gtk_widget_show(table.btn_play);
 	
-	char *display;
+	char *display, *title;
 	
-	if (player[PLY0].total > player[PLY1].total)
+	if (player[PLY0].total > player[PLY1].total) {
 	    display = g_strdup_printf("Congratulation you win %d to %d", player[PLY0].total, player[PLY1].total);
+	    table.match_won[PLY0]++;
+	}
 	    
 	else if (player[PLY0].total == player[PLY1].total)
 		display = g_strdup_printf("The game is a tie %d to %d", player[PLY0].total, player[PLY1].total);
 		
-	else
+	else {
 		display = g_strdup_printf("You loose %d to %d", player[PLY0].total, player[PLY1].total);
+		table.match_won[PLY1]++;
+	}
 		
-    gtk_label_set_text(GTK_LABEL(table.lbl_cards_left), display);
+    gtk_label_set_text(GTK_LABEL(table.lbl_msg), display);
+    gtk_label_set_text(GTK_LABEL(table.lbl_points_player[PLY0]), "");
+    gtk_label_set_text(GTK_LABEL(table.lbl_points_player[PLY1]), "");
     
+    title = g_strdup_printf("Briscola     CPU %d - You %d", table.match_won[PLY1], table.match_won[PLY0]);
+    
+    gtk_header_bar_set_title (GTK_HEADER_BAR (table.headbar), title);
+    
+    g_free(title);
     g_free(display);
 }
 
@@ -188,8 +217,7 @@ void activate_about(void) {
     				   "logo-icon-name", "start-here",
     				   "comments", "reach me on #cansi Freenode IRC",
                        "title", ("Briscola"),
-                       NULL);                   
-
+                       NULL);
 }
 
 void destroy (GtkWidget *window G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)

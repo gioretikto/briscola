@@ -34,3 +34,7 @@ window {
   margin-bottom: 10px;
   font-size: 50px;
 }
+
+label{
+	margin-left: 7px;
+}
