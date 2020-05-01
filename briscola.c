@@ -7,8 +7,6 @@ extern struct card deck[CARDS];
 
 void init_game(struct player_data *player) {
 
-	gtk_widget_hide(table.play_button);
-	
 	shuffle(deck);
 	
 	table.briscola = deck[CARDS-1].suit;
@@ -37,8 +35,7 @@ void init_game(struct player_data *player) {
 	table.lim = 3;
 	
 	player[PLY0].total = 0;
-	player[PLY1].total = 0;
-	
+	player[PLY1].total = 0;	
 }
 
 void ply0_move(unsigned int index, struct player_data *player) {
@@ -94,8 +91,7 @@ void move_reply(struct player_data *player) {
 	gtk_widget_show(table.played_card[0]);
 
 	unsigned int i;
-	unsigned int tmp;
-	
+	unsigned int tmp;	
 	unsigned int index = player[PLY0].slot;
 	
 	for (i = 0; i < table.lim; i++)
@@ -106,7 +102,7 @@ void move_reply(struct player_data *player) {
 		if ((i = find_charge(player)) != 5)
 			;
 		else
-			i = min_max(&player[1], MIN, 1);				/* reply with a card of lowest value */
+			i = min_max(&player[PLY1], MIN, 1);				/* reply with a card of lowest value */
 	}
 	
 	/* if it is an ace or three or 10 */
@@ -130,7 +126,7 @@ void move_reply(struct player_data *player) {
 	}
 	
 	else
-		i = min_max(&player[1], MIN, 1);
+		i = min_max(&player[PLY1], MIN, 1);
 	
 	player[PLY1].slot = i;
 	
@@ -207,6 +203,7 @@ void assign_points (struct player_data *player) {
 		
 		else if (player[PLYR].card[indexR]->value > player[PLYM].card[indexM]->value)
 			table.winner = PLYR;
+			
 		else
 			table.winner = PLYM;
 	}
@@ -306,6 +303,7 @@ void draw_cards (struct player_data *player) {
 	}
 	
 	table.cards_dealt += 2;
+	
 	update_cards_left();
 	
 	if (table.cards_dealt == CARDS) {

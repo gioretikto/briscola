@@ -14,7 +14,7 @@ void create_window() {
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	headbar = gtk_header_bar_new();
 	about_button = gtk_button_new_with_label("About");
-	table.play_button = gtk_button_new_with_label("Play Again");
+	table.btn_play = gtk_button_new_with_label("Play Again");
    	event_box[0] = gtk_event_box_new ();
    	event_box[1] = gtk_event_box_new ();
 	event_box[2] = gtk_event_box_new ();
@@ -72,7 +72,7 @@ void create_window() {
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_briscola);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.image_deck_pile);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.lbl_cards_left);
-	gtk_container_add(GTK_CONTAINER (hbox_table), table.play_button);
+	gtk_container_add(GTK_CONTAINER (hbox_table), table.btn_play);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[0]);
 	gtk_container_add(GTK_CONTAINER (hbox_table), table.played_card[1]);
 	gtk_container_add(GTK_CONTAINER (hbox_player), event_box[0]);
@@ -101,19 +101,23 @@ void create_window() {
 	g_signal_connect (G_OBJECT (event_box[0]), "button_press_event", G_CALLBACK (card1_clicked), player);
 	g_signal_connect (G_OBJECT (event_box[1]), "button_press_event", G_CALLBACK (card2_clicked), player);
     g_signal_connect (G_OBJECT (event_box[2]), "button_press_event", G_CALLBACK (card3_clicked), player);
-    g_signal_connect (G_OBJECT (table.play_button), "button_press_event", G_CALLBACK (init_game), player);
+    g_signal_connect (G_OBJECT (table.btn_play), "button_press_event", G_CALLBACK (init_game), player);
     g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (destroy), NULL);
 	
 	gtk_widget_show_all (window);
 	
-	gtk_widget_hide(table.played_card[PLY0]);
-	gtk_widget_hide(table.played_card[PLY1]);
+	gtk_widget_hide(table.btn_play);
 	
-	/* initialize first hand */
-	  	
 	init_game(player);
 
 	gtk_main();
+}
+
+void start (GtkWidget *widget G_GNUC_UNUSED, struct player_data *player) {
+
+	gtk_widget_hide(table.btn_play);
+	init_game(player);
+
 }
 
 void card1_clicked (GtkWidget *event_box1 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
@@ -153,7 +157,7 @@ void update_cards_left() {
 
 void end_game(struct player_data *player) {
 
-	gtk_widget_show(table.play_button);
+	gtk_widget_show(table.btn_play);
 	
 	char *display;
 	

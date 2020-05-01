@@ -54,7 +54,7 @@ void shuffle (struct card *xdeck) {
 	for (i = 0; i < CARDS - 1; i++) {
 	    j = rand() % CARDS; 
 	    temp = xdeck[j];
-	    xdeck[j] = deck[i];
+	    xdeck[j] = xdeck[i];
 	    xdeck[i] = temp;
     }  
 }

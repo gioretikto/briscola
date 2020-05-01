@@ -27,11 +27,11 @@ struct card {
 struct game {
 	GtkWidget *label_player[2];
 	GtkWidget *lbl_cards_left;
+	GtkWidget *btn_play;
 	GtkWidget *played_card[2];
 	GtkWidget *image_briscola, *image_deck_pile;
 	GtkWidget *PLY1_covered[3];
 	GtkWidget *PLY0_image[3];
-    GtkWidget *play_button;
 	enum states status;
 	enum players turn;
 	enum players winner;
@@ -62,3 +62,4 @@ gboolean clean_table (struct player_data *player);
 unsigned int find_charge(struct player_data *player);
 void update_cards_left(void);
 void end_game(struct player_data *player);
+void start (GtkWidget *widget G_GNUC_UNUSED, struct player_data *player);
