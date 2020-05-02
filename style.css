@@ -3,7 +3,7 @@ window {
 }
 
 .my_hbox_dealer {
-	margin-left: 310px;
+	margin-left: 340px;
 	margin-bottom: 25px;
 	margin-top: 25px;
 }
@@ -14,12 +14,12 @@ window {
 }
 
 .my_hbox_player {
-	margin-left: 310px;
+	margin-left: 340px;
 	margin-top: 80px;	
 }
 
 #card_played1 {
-	margin-left: 120px;
+	margin-left: 140px;
 	margin-right: 20px;
 }
 

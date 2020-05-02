@@ -45,7 +45,7 @@ void init_game(struct player_data *player) {
 	else {
 		table.status = BLOCK;
 		table.next_player = PLY0;
-		move(&player[PLY1]);		
+		move(&player[PLY1]);
 	}
 }
 
@@ -72,7 +72,10 @@ void move(struct player_data *player) {
 
 	unsigned int i;
 	
-	i = min_max(player, MIN, -1);
+	if ((i = verifyCombo(&player[PLY1])) != 5)
+		;
+	else
+		i = min_max(player, MIN, -1);
 	
 	player->slot = i;
 	
@@ -102,36 +105,52 @@ void move_reply(struct player_data *player) {
 	unsigned int tmp;	
 	unsigned int index = player[PLY0].slot;
 	
-	if (player[PLY0].card[index]->suit != table.briscola) {
+	/* if it is an ace or three or 10 */
+	if (player[PLY0].card[index]->value == 11 || player[PLY0].card[index]->value == 10) {
 	
-		if ((i = find_charge(player)) != 5)
+		if (player[PLY0].card[index]->suit == table.briscola) {
+			
+			if (player[PLY0].card[index]->value == 11)	/* There is no way to reply to this card*/
+				i = min_max(&player[1], MIN, 1);
+				
+			else {
+		  		/* try to take with a card of max value first, if fails use the min card */
+				tmp = min_max(&player[1], MAX, 1);	/* get max. card */
+					
+				if (player[PLY1].card[tmp]->value > player[PLY0].card[index]->value)
+					i = tmp;
+					
+				else								 	/* if the max value cannot overtake*/
+					i = min_max(&player[1], MIN, 1);   /* try with min */
+			}
+		}
+			
+		else { /* if the Ace of 3 has suit different from briscola */
+			
+			if ((i = findCharge(&player[PLY1])) != 5)
+				;
+			
+			else if ((i = findBriscola(&player[PLY1])) != 5)
+				;
+			else
+				i = min_max(&player[PLY1], MIN, 1);
+		}
+
+	} /*End of if (player[PLY0].card[index]->value == 11 || .. */
+	
+	else if ((player[PLY0].card[index]->suit != table.briscola) && (player[PLY0].card[index]->value !=0)) {
+	
+		if ((i = findCharge(player)) != 5)
+			;
+		else if ((i = findBriscola(&player[PLY1])) != 5)
 			;
 		else
-			i = min_max(&player[PLY1], MIN, 1);				/* reply with a card of lowest value */
+			i = min_max(&player[PLY1], MIN, 1);			/* reply with a card of lowest value */
 	}
 	
-	/* if it is an ace or three or 10 */
-	else if ( ((player[PLY0].card[index]->value == 11) || (player[PLY0].card[index]->value == 10) || (player[PLY0].card[index]->value == 4)) &&  player[PLY0].card[index]->suit != table.briscola) {
-	 
-			/* try to take with a card of min value 0 first, if fails use the min card */
-			tmp = min_max(&player[PLY1], MIN, 1);	/* get min. card */
-				
-			if (player[PLY1].card[tmp]->value > player[PLY0].card[index]->value) 	   			
-				i = tmp;
-			
-			else {								 	/* if the min value cannot overtake*/
-				i = min_max(&player[1], MAX, 1);   /* try with max */
-						
-				if (player[PLY1].card[i]->value > player[PLY0].card[index]->value)   /* Try to see if the max value can win */
-					;
-					
-				else
-					i = tmp;				
-			}
-	}
-	
-	else
-		i = min_max(&player[PLY1], MIN, 1);
+	else	/* card played has 0 value */
+		i = min_max(&player[PLY1], MIN, 1);				/* reply with a card of lowest value */
+
 	
 	player[PLY1].slot = i;
 	
@@ -161,10 +180,7 @@ void move_reply(struct player_data *player) {
 	
 	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[PLY1]), player[PLY1].card[i]->file);
 	
-	gtk_widget_show(table.played_card[PLY1]);	
-
-	printf("Played: value %d, suit %d, Index: %d\n", player[PLY0].card[index]->value, player[PLY0].card[index]->suit,  player[PLY0].slot);
- 	printf("Reply: value %d, suit %d, Index: %d\n", player[PLY1].card[i]->value, player[PLY1].card[i]->suit, player[PLY1].slot);
+	gtk_widget_show(table.played_card[PLY1]);
  	
 	/* Assign points of the hand */
 	assign_points(player);
@@ -188,7 +204,7 @@ void assign_points (struct player_data *player) {
 	
 	unsigned int indexR;		/* Index of player replying */
 	unsigned int indexM;		/* Index of player who moved */
-		
+	
 	if (table.turn == PLY0) {
 		PLYM = PLY0;
 		PLYR = PLY1;
@@ -202,6 +218,9 @@ void assign_points (struct player_data *player) {
 		indexM = player[PLY1].slot;
 		indexR = player[PLY0].slot;
 	}
+	
+	printf("Played: value %d, suit %d, Index: %d\n", player[PLYM].card[indexM]->value, player[PLYM].card[indexM]->suit,  player[PLYM].slot);
+ 	printf("Reply: value %d, suit %d, Index: %d\n", player[PLYR].card[indexR]->value, player[PLYR].card[indexR]->suit, player[PLYR].slot);
 		
 	/* Evaluate the table.winner of the hand */
 		
@@ -337,9 +356,9 @@ unsigned int min_max (struct player_data *player, _Bool choice, int m) { 	/* if 
 		if (player->card[i]->suit == table.briscola) {
 		
 			if (player->card[i]->value == 0)
-				a[i] += 2;
+				a[i] += 5;
 			else
-				a[i] += 1;
+				a[i] += 4;
 		}
 		
 		if (player->card[i]->suit != table.briscola)
@@ -371,7 +390,7 @@ unsigned int min_max (struct player_data *player, _Bool choice, int m) { 	/* if 
 	return index;
 }
 
-unsigned int find_charge(struct player_data *player) {
+unsigned int findCharge(struct player_data *player) {
 
 	unsigned int i;
 	
@@ -382,5 +401,28 @@ unsigned int find_charge(struct player_data *player) {
 			}
 	}
 		
+	return 5;
+}
+
+unsigned int findBriscola(struct player_data *player) {
+
+	unsigned int i;
+	
+	for (i = 0; i < table.lim; i++) {
+		if (player->card[i]->suit == table.briscola) 
+				return i;
+	}
+		
+	return 5;
+}
+
+unsigned int verifyCombo (struct player_data *player) {	/*Try to see if PLY0 has all aces and 3s */
+	
+	unsigned int i;
+	
+	if ((player->card[0]->value + player->card[1]->value + player->card[2]->value) >= 30)
+		if ((i = findBriscola(player)) != 5)
+			return i;
+
 	return 5;
 }
