@@ -62,8 +62,7 @@ void ply0_move(unsigned int index, struct player_data *player) {
 		move_reply(player);
 			
 	else {
-		gtk_image_set_from_resource (GTK_IMAGE(table.played_card[1]), player->card[player[PLY0].slot]->file);
-		gtk_widget_show(table.played_card[1]);
+		displayCard(&player[PLY0], 1);
 		assign_points(player);
 	}
 }
@@ -89,17 +88,14 @@ void move(struct player_data *player) {
 	else
 		gtk_widget_hide(table.PLY1_covered[i]);
 	
-	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[0]), player->card[i]->file);
-		
-	gtk_widget_show(table.played_card[0]);
+	displayCard(player, 0);
 
 	table.status = PLAY;
 }
 
 void move_reply(struct player_data *player) {
 
-	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[0]), player[PLY0].card[player[PLY0].slot]->file);
-	gtk_widget_show(table.played_card[0]);
+	displayCard(&player[PLY0], 0);
 
 	unsigned int i;
 	unsigned int tmp;	
@@ -182,9 +178,7 @@ void move_reply(struct player_data *player) {
 	
 	/* Move card played by PLY1 on the table */
 	
-	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[PLY1]), player[PLY1].card[i]->file);
-	
-	gtk_widget_show(table.played_card[PLY1]);
+	displayCard(&player[PLY1], 1);
  	
 	/* Assign points of the hand */
 	assign_points(player);

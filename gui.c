@@ -225,3 +225,10 @@ void destroy (GtkWidget *window G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {	
 	gtk_main_quit ();
 }
+
+void displayCard(struct player_data *player, int index) {
+
+	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[index]), player->card[player->slot]->file);		
+	gtk_widget_show(table.played_card[index]);
+
+}
