@@ -130,10 +130,12 @@ void move_reply(struct player_data *player) {
 			if ((i = findCharge(&player[PLY1])) != 5)
 				;
 			
-			else if ((i = findBriscola(&player[PLY1])) != 5)
-				;
-			else
-				i = min_max(&player[PLY1], MIN, 1);
+			else {
+				if ((i = findBriscola(&player[PLY1])) != 5)
+					;
+				else
+					i = min_max(&player[PLY1], MIN, 1);
+			}
 		}
 
 	} /*End of if (player[PLY0].card[index]->value == 11 || .. */
@@ -142,10 +144,12 @@ void move_reply(struct player_data *player) {
 	
 		if ((i = findCharge(player)) != 5)
 			;
-		else if ((i = findBriscola(&player[PLY1])) != 5)
-			;
-		else
-			i = min_max(&player[PLY1], MIN, 1);			/* reply with a card of lowest value */
+		else {
+			if ((i = findBriscola(&player[PLY1])) != 5)
+				;
+			else
+				i = min_max(&player[PLY1], MIN, 1);			/* reply with a card of lowest value */
+		}
 	}
 	
 	else	/* card played has 0 value */
