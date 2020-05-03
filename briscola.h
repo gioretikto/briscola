@@ -4,7 +4,7 @@
 #define CARDS 40
 
 enum suit {BASTONI, DENARI, COPPE, SPADE};
-enum states {BLOCK, PLAY};
+enum states {BLOCK, PLAY, LAST_HAND=20};
 enum choice {MIN, MAX};
 
 enum players {PLY0, PLY1};
@@ -12,7 +12,8 @@ enum players {PLY0, PLY1};
 struct player_data {
 	int total;				/* total points */
 	struct card *card[3];
-	unsigned int slot;				/* card index  */	
+	unsigned int slot;		/* card index  */
+	unsigned int flag;
 };
 
 struct card {
@@ -55,11 +56,11 @@ void card3_clicked (GtkWidget *event_box G_GNUC_UNUSED, GdkEventButton *event G_
 void init_game(struct player_data *player);
 void ply0_move(unsigned int index, struct player_data *player);
 void move_reply(struct player_data *player);
-void update_points(struct player_data *player, int index);
+void update_points(struct player_data *player);
 unsigned int min_max (struct player_data *player, _Bool s, int m);
 void assign_points(struct player_data *player);
 void draw_cards(struct player_data *player);
-void move(struct player_data *player);
+void move(struct player_data *cpu);
 gboolean clean_table (struct player_data *player);
 unsigned int findCharge(struct player_data *player);
 void update_cards_left(void);

@@ -13,29 +13,29 @@ void init_game(struct player_data *player) {
 	
 	/* Deal first 6 cards */
 	
-	player[PLY0].card[0] = &deck[0];
-	player[PLY0].card[1] = &deck[1];
-	player[PLY0].card[2] = &deck[2];
+	player->card[0] = &deck[0];
+	player->card[1] = &deck[1];
+	player->card[2] = &deck[2];
 	
-	player[PLY1].card[0] = &deck[3];
-	player[PLY1].card[1] = &deck[4];
-	player[PLY1].card[2] = &deck[5];
+	(player+1)->card[0] = &deck[3];
+	(player+1)->card[1] = &deck[4];
+	(player+1)->card[2] = &deck[5];
 	
-	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[0]), player[PLY0].card[0]->file);
-	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[1]), player[PLY0].card[1]->file);
-	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[2]), player[PLY0].card[2]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[0]), player->card[0]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[1]), player->card[1]->file);
+	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[2]), player->card[2]->file);
 	
 	gtk_image_set_from_resource (GTK_IMAGE(table.image_briscola), deck[CARDS-1].file);
 	
-	table.cards_dealt = 6;
-	
 	memset(table.memo, 0, sizeof(table.memo));
 	
+	player->total = 0;
+	(player+1)->total = 0;
 	table.hand = 1;
 	table.lim = 3;
+	table.cards_dealt = 6;
 	
-	player[PLY0].total = 0;
-	player[PLY1].total = 0;
+	update_cards_left();
 	
 	if (table.next_player == PLY0) {
 		table.status = PLAY;
@@ -45,7 +45,7 @@ void init_game(struct player_data *player) {
 	else {
 		table.status = BLOCK;
 		table.next_player = PLY0;
-		move(&player[PLY1]);
+		move(player+1);
 	}
 }
 
@@ -53,7 +53,7 @@ void ply0_move(unsigned int index, struct player_data *player) {
 
 	table.status = BLOCK;
 		
-	player[PLY0].slot = index;
+	player->slot = index;
 		
 	/* Hide played card */
 	gtk_widget_hide(table.PLY0_image[index]);
@@ -62,123 +62,127 @@ void ply0_move(unsigned int index, struct player_data *player) {
 		move_reply(player);
 			
 	else {
-		displayCard(&player[PLY0], 1);
+		displayCard(player, 1);
 		assign_points(player);
 	}
 }
 
-void move(struct player_data *player) {
+void move(struct player_data *cpu) {
 
 	unsigned int i;
 	
-	if ((i = verifyCombo(&player[PLY1])) != 5)
+	if ((i = verifyCombo(cpu)) != 5)
 		;
 	else
-		i = min_max(player, MIN, -1);
+		i = min_max(cpu, MIN, -1);
 	
-	player->slot = i;
+	cpu->slot = i;
 	
 	/* Hide card Played by PLY1 */	
-  	if (table.hand == 18)							/* In the last 3 hands start hiding from card 3 */
+  	if (table.hand == LAST_HAND-2)							/* In the last 3 hands start hiding from card 3 */
 		gtk_widget_hide(table.PLY1_covered[2]);
 		
-	else if (table.hand == 19)
+	else if (table.hand == LAST_HAND-1)
 		gtk_widget_hide(table.PLY1_covered[1]);
 			
 	else
 		gtk_widget_hide(table.PLY1_covered[i]);
 	
-	displayCard(player, 0);
+	displayCard(cpu, 0);
 
 	table.status = PLAY;
 }
 
 void move_reply(struct player_data *player) {
 
-	displayCard(&player[PLY0], 0);
+	struct player_data *pm, *pr; 	/* pm: player who moved*/
+	
+	pm = player;
+	pr = player + 1;
+
+	displayCard(pm, 0);
 
 	unsigned int i;
 	unsigned int tmp;	
-	unsigned int index = player[PLY0].slot;
 	
 	/* if it is an ace or three or 10 */
-	if (player[PLY0].card[index]->value == 11 || player[PLY0].card[index]->value == 10) {
+	if (pm->card[pm->slot]->value == 11 || pm->card[pm->slot]->value == 10) {
 	
-		if (player[PLY0].card[index]->suit == table.briscola) {
+		if (pm->card[pm->slot]->suit == table.briscola) {
 			
-			if (player[PLY0].card[index]->value == 11)	/* There is no way to reply to this card*/
-				i = min_max(&player[1], MIN, 1);
+			if (pm->card[pm->slot]->value == 11)	/* There is no way to reply to this card*/
+				i = min_max(pr, MIN, 1);
 				
 			else {
 		  		/* try to take with a card of max value first, if fails use the min card */
-				tmp = min_max(&player[1], MAX, 1);	/* get max. card */
+				tmp = min_max(pr, MAX, 1);	/* get max. card */
 					
-				if (player[PLY1].card[tmp]->value > player[PLY0].card[index]->value)
+				if (pr->card[tmp]->value > pm->card[pm->slot]->value)
 					i = tmp;
 					
 				else								 	/* if the max value cannot overtake*/
-					i = min_max(&player[1], MIN, 1);   /* try with min */
+					i = min_max(pr, MIN, 1);   /* try with min */
 			}
 		}
 			
 		else { /* if the Ace of 3 has suit different from briscola */
 			
-			if ((i = findCharge(&player[PLY1])) != 5)
+			if ((i = findCharge(pr)) != 5)
 				;
 			
 			else {
-				if ((i = findBriscola(&player[PLY1])) != 5)
+				if ((i = findBriscola(pr)) != 5)
 					;
 				else
-					i = min_max(&player[PLY1], MIN, 1);
+					i = min_max(pr, MIN, 1);
 			}
 		}
 
-	} /*End of if (player[PLY0].card[index]->value == 11 || .. */
+	} /*End of if (pm->card[index]->value == 11 || .. */
 	
-	else if ((player[PLY0].card[index]->suit != table.briscola) && (player[PLY0].card[index]->value !=0)) {
+	else if ((pm->card[pm->slot]->suit != table.briscola) && (pm->card[pm->slot]->value !=0)) {
 	
 		if ((i = findCharge(player)) != 5)
 			;
 		else {
-			if ((i = findBriscola(&player[PLY1])) != 5)
+			if ((i = findBriscola(pr)) != 5)
 				;
 			else
-				i = min_max(&player[PLY1], MIN, 1);			/* reply with a card of lowest value */
+				i = min_max(pr, MIN, 1);			/* reply with a card of lowest value */
 		}
 	}
 	
 	else	/* card played has 0 value */
-		i = min_max(&player[PLY1], MIN, 1);				/* reply with a card of lowest value */
+		i = min_max(pr, MIN, 1);				/* reply with a card of lowest value */
 
 	
-	player[PLY1].slot = i;
+	pr->slot = i;
 	
 	/* Hide card Played by PLY1 */
 	
-  	if (table.hand == 18)							/* In the last 3 hands start hiding from card 3 */
+  	if (table.hand == LAST_HAND-2)							/* In the last 3 hands start hiding from card 3 */
 		gtk_widget_hide(table.PLY1_covered[2]);
 		
-	else if (table.hand == 19)
+	else if (table.hand == LAST_HAND-1)
 		gtk_widget_hide(table.PLY1_covered[1]);
 			
 	else 
 		gtk_widget_hide(table.PLY1_covered[i]);
 	
 	
- 	if (player[PLY0].card[index]->suit != table.briscola) {
- 		if (player[PLY0].card[index]->value == 10 || player[PLY0].card[index]->value == 11)
- 			table.memo[player[PLY0].card[index]->suit]++;
+ 	if (pm->card[pm->slot]->suit != table.briscola) {
+ 		if (pm->card[pm->slot]->value == 10 || pm->card[pm->slot]->value == 11)
+ 			table.memo[pm->card[pm->slot]->suit]++;
  	}
  			
- 	if (player[PLY1].card[i]->suit != table.briscola) {
- 		if (player[PLY1].card[i]->value == 10 || player[PLY1].card[i]->value == 11)
- 			table.memo[player[PLY1].card[i]->suit]++;
+ 	if (pr->card[i]->suit != table.briscola) {
+ 		if (pr->card[i]->value == 10 || pr->card[i]->value == 11)
+ 			table.memo[pr->card[i]->suit]++;
  	}
 	
 	/* Move card played by PLY1 on the table */
 	
-	displayCard(&player[PLY1], 1);
+	displayCard(pr, 1);
  	
 	/* Assign points of the hand */
 	assign_points(player);
@@ -187,77 +191,68 @@ void move_reply(struct player_data *player) {
 void assign_points (struct player_data *player) {
 
 	unsigned int i;
-
+	struct player_data *pm, *pr;
+	
 	printf("Hand: %d\n", table.hand);
 	printf("Cards dealt: %d\n", table.cards_dealt);
 	printf("Briscola: %d\n", table.briscola);
 	
 	for (i = 0; i < table.lim; i++)
-	 	printf("Card %u: value %d, suit %d\n", i+1, player[PLY1].card[i]->value, player[PLY1].card[i]->suit);
+	 	printf("Card %u: value %d, suit %d\n", i+1, (player+1)->card[i]->value, (player+1)->card[i]->suit);
 	 	
 	printf("\n\n");
-
-	enum players PLYM;			/* Player who moved */
-	enum players PLYR;			/* Player replying */
 	
-	unsigned int indexR;		/* Index of player replying */
-	unsigned int indexM;		/* Index of player who moved */
-	
-	if (table.turn == PLY0) {
-		PLYM = PLY0;
-		PLYR = PLY1;
-		indexM = player[PLY0].slot;
-		indexR = player[PLY1].slot;
+	if (table.turn & PLY0) {
+		pm = player;
+		pr = pm + 1;
 	}
-		
+	
 	else {
-		PLYM = PLY1;
-		PLYR = PLY0;
-		indexM = player[PLY1].slot;
-		indexR = player[PLY0].slot;
+		pr = player;
+		pm = pr + 1;
 	}
 	
-	printf("Played: value %d, suit %d, Index: %d\n", player[PLYM].card[indexM]->value, player[PLYM].card[indexM]->suit,  player[PLYM].slot);
- 	printf("Reply: value %d, suit %d, Index: %d\n", player[PLYR].card[indexR]->value, player[PLYR].card[indexR]->suit, player[PLYR].slot);
+	printf("Played: value %d, suit %d, Index: %d\n", pm->card[pm->slot]->value, pm->card[pm->slot]->suit, pm->slot);
+ 	printf("Reply: value %d, suit %d, Index: %d\n", pr->card[pr->slot]->value, pr->card[pr->slot]->suit, pr->slot);
 		
 	/* Evaluate the table.winner of the hand */
 		
-	if (player[PLYR].card[indexR]->suit == player[PLYM].card[indexM]->suit)	{
+	if (pr->card[pr->slot]->suit == pm->card[pm->slot]->suit) {
 		
-		if (player[PLYR].card[indexR]->value == player[PLYM].card[indexM]->value) {	/* if they are both cards of 0 value */
+		if (pr->card[pr->slot]->value == pm->card[pm->slot]->value) {	/* if they are both cards of 0 value */
 		
-			if (player[PLYR].card[indexR]->index > player[PLYM].card[indexM]->index)
-				table.winner = PLYR;
+			if (pr->card[pr->slot]->index > pm->card[pm->slot]->index)
+				table.winner = pr->flag;
 			else
-				table.winner = PLYM;
+				table.winner = pm->flag;
 		}
 		
-		else if (player[PLYR].card[indexR]->value > player[PLYM].card[indexM]->value)
-			table.winner = PLYR;
+		else if (pr->card[pr->slot]->value > pm->card[pm->slot]->value)
+			table.winner = pr->flag;
 			
 		else
-			table.winner = PLYM;
+			table.winner = pm->flag;
 	}
 					
-	else if ((player[PLYR].card[indexR]->suit == table.briscola) || (player[PLYM].card[indexM]->suit == table.briscola)) {
+	else if ((pr->card[pr->slot]->suit == table.briscola) || (pm->card[pm->slot]->suit == table.briscola)) {
 		
-		if (player[PLYR].card[indexR]->suit == table.briscola)
-			table.winner = PLYR;
+		if (pr->card[pr->slot]->suit == table.briscola)
+			table.winner = pr->flag;
 		else
-			table.winner = PLYM;
+			table.winner = pm->flag;
 	}
 			
 	else
-		table.winner = PLYM;
+		table.winner = pm->flag;
 
 	/* Assign Points to the winner of the hand*/
 		
-	player[table.winner].total += player[PLYM].card[indexM]->value + player[PLYR].card[indexR]->value;
+	player[table.winner].total += pm->card[pm->slot]->value + pr->card[pr->slot]->value;
 		
-	printf("Player who moved is: %u\n", PLYM);
-	printf("Player who replied is: %u\n", PLYR);
-	printf("Total Points PLY0: %d\n", player[PLY0].total);
-	printf("Total Points PLY1: %d\n", player[PLY1].total);
+	printf("Player who moved is: %u\n", pm->flag);
+	printf("Player who replied is: %u\n", pr->flag);
+	printf("Total Points PLY0: %d\n", player->total);
+	printf("Total Points PLY1: %d\n", (player+1)->total);
 	printf("Winner is: %d\n\n", table.winner);
 		
 	table.turn = table.winner;
@@ -267,15 +262,15 @@ void assign_points (struct player_data *player) {
 
 gboolean clean_table (struct player_data *player) {
 
-		update_points(&player[table.winner], table.winner);
+	update_points(&player[table.winner]);
 
 	if (table.cards_dealt <= CARDS-2) {
 		draw_cards(player);
-		gtk_widget_show(table.PLY1_covered[player[PLY1].slot]);
+		gtk_widget_show(table.PLY1_covered[(player+1)->slot]);
 		
 		/* Set the new card for PLY0 */
-		gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[player[PLY0].slot]), player[PLY0].card[player[PLY0].slot]->file);
-		gtk_widget_show(table.PLY0_image[player[PLY0].slot]);
+		gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[player->slot]), player->card[player->slot]->file);
+		gtk_widget_show(table.PLY0_image[player->slot]);
 		
 		if (table.hand == 16) /*when there are only 2 cards left to play pile becomes back */
 			gtk_image_set_from_resource (GTK_IMAGE(table.image_deck_pile), "/cards/back.png");
@@ -302,11 +297,11 @@ gboolean clean_table (struct player_data *player) {
 	
 	table.hand++;
 	
-	if (table.hand == 21)
+	if (table.hand == LAST_HAND+1)
 		end_game(player);
 		
 	else if (table.turn == PLY1)
-		move(&player[PLY1]);
+		move(player+1);
 		
 	else
 		table.status = PLAY;
@@ -315,20 +310,17 @@ gboolean clean_table (struct player_data *player) {
 }
 
 void draw_cards (struct player_data *player) {
-
-	unsigned int index0 = player[PLY0].slot;
-	unsigned int index1 = player[PLY1].slot;
 	
 	/* Draw new card from deck */
 
-	if (table.turn == PLY0) {
-		player[PLY0].card[index0] = &deck[table.cards_dealt];
-		player[PLY1].card[index1] = &deck[table.cards_dealt+1];
+	if (table.turn & PLY0) {
+		player->card[player->slot] = &deck[table.cards_dealt];
+		(player+1)->card[(player+1)->slot] = &deck[table.cards_dealt+1];
 	}
 	
 	else {
-		player[PLY1].card[index1] = &deck[table.cards_dealt];
-		player[PLY0].card[index0] = &deck[table.cards_dealt+1];
+		(player+1)->card[(player+1)->slot] = &deck[table.cards_dealt];
+		player->card[player->slot] = &deck[table.cards_dealt+1];
 	}
 	
 	table.cards_dealt += 2;
@@ -393,8 +385,8 @@ unsigned int findCharge(struct player_data *player) {
 	unsigned int i;
 	
 	for (i = 0; i < table.lim; i++) {
-		if (player[PLY1].card[i]->suit == player[PLY0].card[player[PLY0].slot]->suit) {
-			if (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].slot]->value)
+		if ( (player+1)->card[i]->suit == player->card[player->slot]->suit) {
+			if ((player+1)->card[i]->value > player->card[player->slot]->value)
 				return i;
 			}
 	}

@@ -60,6 +60,8 @@ void create_window() {
    	
    	table.next_player = PLY0;
    	table.status = BLOCK;
+   	player[PLY0].flag = PLY0;
+   	player[PLY1].flag = PLY1;
    	
 	memset(table.match_won, 0, sizeof(table.match_won));
 	
@@ -155,11 +157,11 @@ void card3_clicked (GtkWidget *event_box3 G_GNUC_UNUSED, GdkEventButton *event G
 		ply0_move(2, player);
 }
 
-void update_points(struct player_data *player, int index) {
+void update_points(struct player_data *player) {
 
 	char *display;
-    display = g_strdup_printf("%d", player->total);									/* convert num to str */
-    gtk_label_set_text (GTK_LABEL(table.lbl_points_player[index]), display);		/* set label to "display */
+    display = g_strdup_printf("%d", player->total);										/* convert num to str */
+    gtk_label_set_text (GTK_LABEL(table.lbl_points_player[player->flag]), display);		/* set label to "display */
     
     g_free(display);
 }
