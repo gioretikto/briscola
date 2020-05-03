@@ -59,7 +59,6 @@ void create_window() {
    	struct player_data player[2];
    	
    	game.next_player = PLY1;
-   	game.turn = PLY1;
    	game.status = BLOCK;
    	player[PLY0].flag = PLY0;
    	player[PLY1].flag = PLY1;

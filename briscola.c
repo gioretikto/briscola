@@ -43,12 +43,14 @@ void init_game(struct player_data *player) {
 	update_cards_left();
 	
 	if (game.next_player == PLY0) {
+		game.turn = PLY0;
 		game.status = PLAY;
 		game.next_player = PLY1;
 	}
 		
 	else {
 		game.status = BLOCK;
+		game.turn = PLY1;
 		game.next_player = PLY0;
 		move(&player[PLY1]);
 	}
