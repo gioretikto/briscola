@@ -45,16 +45,27 @@ struct card	deck[] = {
 	{39, "/cards/39.png", 3, SPADE},
 	{40, "/cards/40.png", 4, SPADE}
     };
+    
+static void swap (struct card *a, struct card *b) { 
+	struct card temp = *a;
+    *a = *b; 
+    *b = temp; 
+}
 
-void shuffle (struct card *xdeck) {
 
-	int i, j;
-	struct card temp;
+static int randgen(int lower, int upper) {
+  int r;
+  int span = upper - lower + 1;
+  int cutoff = (RAND_MAX / span) * span;
 
-	for (i = 0; i < CARDS - 1; i++) {
-	    j = rand() % CARDS; 
-	    temp = xdeck[j];
-	    xdeck[j] = xdeck[i];
-	    xdeck[i] = temp;
-    }  
+  while ((r = rand()) >= cutoff)
+    continue;
+
+  return ((r % span) + lower);
+}
+  
+void shuffle(struct card *xdeck) {
+  for (int i = CARDS - 1; i >= 1; --i)
+    swap(&xdeck[i],             		 // swap the current element
+         &xdeck[randgen(0, i)]);      // with some random element
 }
