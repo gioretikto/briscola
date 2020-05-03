@@ -23,7 +23,7 @@ struct card {
    	enum suit suit;
 };
 
-struct game {
+struct glob_briscola {
 	GtkWidget *headbar;
 	GtkWidget *lbl_points_player[2];
 	GtkWidget *lbl_msg;
@@ -33,6 +33,9 @@ struct game {
 	GtkWidget *image_briscola, *image_deck_pile;
 	GtkWidget *PLY1_covered[3];
 	GtkWidget *PLY0_image[3];
+}table;
+
+struct glob_struct{
 	enum states status;
 	enum players turn;
 	enum suit briscola;
@@ -42,7 +45,7 @@ struct game {
 	unsigned int lim;
 	unsigned int match_won[2];
 	int memo[4]; 	/* to memorize Aces and 3 played */
-}table;
+}game;
 
 void create_window(void);
 void activate_about(void);

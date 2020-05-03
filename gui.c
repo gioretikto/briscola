@@ -31,7 +31,7 @@ void create_window() {
    	table.played_card[0] = gtk_image_new();
    	table.played_card[1] = gtk_image_new();
 
-	table.image_deck_pile = gtk_image_new_from_resource ("/cards/deck.png");
+	table.image_deck_pile = gtk_image_new();
 	
 	/* Image of Dealer's covered cards */
 	table.PLY1_covered[0] = gtk_image_new_from_resource ("/cards/back.png");
@@ -58,12 +58,12 @@ void create_window() {
             
    	struct player_data player[2];
    	
-   	table.next_player = PLY0;
-   	table.status = BLOCK;
+   	game.next_player = PLY1;
+   	game.status = BLOCK;
    	player[PLY0].flag = PLY0;
    	player[PLY1].flag = PLY1;
    	
-	memset(table.match_won, 0, sizeof(table.match_won));
+	memset(game.match_won, 0, sizeof(game.match_won));
 	
     gtk_container_add(GTK_CONTAINER (table.headbar), about_button);
 	gtk_container_add(GTK_CONTAINER (window), vbox);
@@ -141,19 +141,19 @@ void start (GtkWidget *widget G_GNUC_UNUSED, struct player_data *player) {
 
 void card1_clicked (GtkWidget *event_box1 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
 		
-	if (table.status == PLAY)
+	if (game.status == PLAY)
 		ply0_move(0, player);
 }
 
 void card2_clicked (GtkWidget *event_box2 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
  
-	if (table.status == PLAY)
+	if (game.status == PLAY)
 		ply0_move(1, player);
 }
 
 void card3_clicked (GtkWidget *event_box3 G_GNUC_UNUSED, GdkEventButton *event G_GNUC_UNUSED, struct player_data *player) {
 
-	if (table.status == PLAY)
+	if (game.status == PLAY)
 		ply0_move(2, player);
 }
 
@@ -169,7 +169,7 @@ void update_points(struct player_data *player) {
 void update_cards_left() {
 
    	char *display;
-    display = g_strdup_printf("%d", CARDS - table.cards_dealt);
+    display = g_strdup_printf("%d", CARDS - game.cards_dealt);
     gtk_label_set_text (GTK_LABEL(table.lbl_cards_left), display);		/* set label to "display */
 	g_free(display);
 }
@@ -184,7 +184,7 @@ void end_game(struct player_data *player) {
 	
 	if (player[PLY0].total > player[PLY1].total) {
 	    display = g_strdup_printf("Congratulation you win %d to %d", player[PLY0].total, player[PLY1].total);
-	    table.match_won[PLY0]++;
+	    game.match_won[PLY0]++;
 	}
 	    
 	else if (player[PLY0].total == player[PLY1].total)
@@ -192,14 +192,14 @@ void end_game(struct player_data *player) {
 		
 	else {
 		display = g_strdup_printf("You loose %d to %d", player[PLY0].total, player[PLY1].total);
-		table.match_won[PLY1]++;
+		game.match_won[PLY1]++;
 	}
 		
     gtk_label_set_text(GTK_LABEL(table.lbl_msg), display);
     gtk_label_set_text(GTK_LABEL(table.lbl_points_player[PLY0]), "");
     gtk_label_set_text(GTK_LABEL(table.lbl_points_player[PLY1]), "");
     
-    title = g_strdup_printf("Briscola     CPU %d - You %d", table.match_won[PLY1], table.match_won[PLY0]);
+    title = g_strdup_printf("Briscola     CPU %d - You %d", game.match_won[PLY1], game.match_won[PLY0]);
     
     gtk_header_bar_set_title (GTK_HEADER_BAR (table.headbar), title);
     
@@ -232,5 +232,4 @@ void displayCard(struct player_data *player, int index) {
 
 	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[index]), player->card[player->slot]->file);		
 	gtk_widget_show(table.played_card[index]);
-
 }
