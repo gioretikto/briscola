@@ -209,7 +209,7 @@ void assign_points (struct player_data *player) {
 	 	
 	printf("\n\n");
 	
-	if (game.turn & PLY0) {
+	if (game.turn == PLY0) {
 		pm = player;
 		pr = pm + 1;
 	}
@@ -319,7 +319,7 @@ void draw_cards (struct player_data *player) {
 	
 	/* Draw new card from deck */
 
-	if (game.turn & PLY0) {
+	if (game.turn == PLY0) {
 		player->card[player->slot] = &deck[game.cards_dealt];
 		(player+1)->card[(player+1)->slot] = &deck[game.cards_dealt+1];
 	}
