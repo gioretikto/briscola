@@ -134,7 +134,7 @@ void move_reply(struct player_data *player) {
 			
 		else { /* if the Ace of 3 has suit different from briscola */
 			
-			if ((i = findCharge(pr)) != 5)
+			if ((i = findCharge(player)) != 5)
 				;
 			
 			else {
@@ -391,8 +391,8 @@ unsigned int findCharge(struct player_data *player) {
 	unsigned int i;
 	
 	for (i = 0; i < game.lim; i++) {
-		if ( (player+1)->card[i]->suit == player->card[player->slot]->suit) {
-			if ((player+1)->card[i]->value > player->card[player->slot]->value)
+		if (player[PLY1].card[i]->suit == player[PLY0].card[player[PLY0].slot]->suit) {
+			if (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].slot]->value)
 				return i;
 			}
 	}
@@ -400,24 +400,24 @@ unsigned int findCharge(struct player_data *player) {
 	return 5;
 }
 
-unsigned int findBriscola(struct player_data *player) {
+unsigned int findBriscola(struct player_data *cpu) {
 
 	unsigned int i;
 	
 	for (i = 0; i < game.lim; i++) {
-		if (player->card[i]->suit == game.briscola) 
+		if (cpu->card[i]->suit == game.briscola)
 				return i;
 	}
 		
 	return 5;
 }
 
-unsigned int verifyCombo (struct player_data *player) {	/*Try to see if PLY0 has all aces and 3s */
+unsigned int verifyCombo (struct player_data *cpu) {	/*Try to see if PLY0 has all aces and 3s */
 	
 	unsigned int i;
 	
-	if ((player->card[0]->value + player->card[1]->value + player->card[2]->value) >= 30)
-		if ((i = findBriscola(player)) != 5)
+	if ((cpu->card[0]->value + cpu->card[1]->value + cpu->card[2]->value) >= 30)
+		if ((i = findBriscola(cpu)) != 5)
 			return i;
 
 	return 5;
