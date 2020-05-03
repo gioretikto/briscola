@@ -35,7 +35,6 @@ struct game {
 	GtkWidget *PLY0_image[3];
 	enum states status;
 	enum players turn;
-	enum players winner;
 	enum suit briscola;
 	unsigned int next_player;
 	unsigned int cards_dealt;

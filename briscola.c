@@ -191,7 +191,7 @@ void move_reply(struct player_data *player) {
 void assign_points (struct player_data *player) {
 
 	unsigned int i;
-	struct player_data *pm, *pr;
+	struct player_data *pm, *pr, *winner;
 	
 	printf("Hand: %d\n", table.hand);
 	printf("Cards dealt: %d\n", table.cards_dealt);
@@ -215,54 +215,54 @@ void assign_points (struct player_data *player) {
 	printf("Played: value %d, suit %d, Index: %d\n", pm->card[pm->slot]->value, pm->card[pm->slot]->suit, pm->slot);
  	printf("Reply: value %d, suit %d, Index: %d\n", pr->card[pr->slot]->value, pr->card[pr->slot]->suit, pr->slot);
 		
-	/* Evaluate the table.winner of the hand */
+	/* Evaluate the winner of the hand */
 		
 	if (pr->card[pr->slot]->suit == pm->card[pm->slot]->suit) {
 		
 		if (pr->card[pr->slot]->value == pm->card[pm->slot]->value) {	/* if they are both cards of 0 value */
 		
 			if (pr->card[pr->slot]->index > pm->card[pm->slot]->index)
-				table.winner = pr->flag;
+				winner = pr;
 			else
-				table.winner = pm->flag;
+				winner = pm;
 		}
 		
 		else if (pr->card[pr->slot]->value > pm->card[pm->slot]->value)
-			table.winner = pr->flag;
+			winner = pr;
 			
 		else
-			table.winner = pm->flag;
+			winner = pm;
 	}
 					
 	else if ((pr->card[pr->slot]->suit == table.briscola) || (pm->card[pm->slot]->suit == table.briscola)) {
 		
 		if (pr->card[pr->slot]->suit == table.briscola)
-			table.winner = pr->flag;
+			winner = pr;
 		else
-			table.winner = pm->flag;
+			winner = pm;
 	}
 			
 	else
-		table.winner = pm->flag;
+		winner = pm;
 
 	/* Assign Points to the winner of the hand*/
 		
-	player[table.winner].total += pm->card[pm->slot]->value + pr->card[pr->slot]->value;
+	winner->total += pm->card[pm->slot]->value + pr->card[pr->slot]->value;
 		
 	printf("Player who moved is: %u\n", pm->flag);
 	printf("Player who replied is: %u\n", pr->flag);
 	printf("Total Points PLY0: %d\n", player->total);
 	printf("Total Points PLY1: %d\n", (player+1)->total);
-	printf("Winner is: %d\n\n", table.winner);
+	printf("Winner is: %d\n\n", winner->flag);
 		
-	table.turn = table.winner;
+	table.turn = winner->flag;
+	
+	update_points(winner);
 	
 	g_timeout_add(1000, (GSourceFunc)clean_table, player);
 }
 
 gboolean clean_table (struct player_data *player) {
-
-	update_points(&player[table.winner]);
 
 	if (table.cards_dealt <= CARDS-2) {
 		draw_cards(player);
