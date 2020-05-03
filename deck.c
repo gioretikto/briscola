@@ -45,7 +45,9 @@ struct card	deck[] = {
 	{39, "/cards/39.png", 3, SPADE},
 	{40, "/cards/40.png", 4, SPADE}
     };
-    
+
+/* The following is The Fisher–Yates algorithm to shuffle the deck */
+
 static void swap (struct card *a, struct card *b) { 
 	struct card temp = *a;
     *a = *b; 

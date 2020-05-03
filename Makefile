@@ -8,7 +8,7 @@ OBJS = $(SRCS:.c=.o)
 briscola: $(OBJS)
 	 $(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 clean:
-	rm -f $(OBJFILES)
+	rm -f $(OBJS)
 install:
-	cp $(TARGET) /usr/local/bin
+	install $(TARGET) /usr/local/bin
 	

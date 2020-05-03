@@ -38,8 +38,8 @@ struct glob_briscola {
 struct glob_struct{
 	enum states status;
 	enum players turn;
+	enum players next_player;
 	enum suit briscola;
-	unsigned int next_player;
 	unsigned int cards_dealt;
 	unsigned int hand;
 	unsigned int lim;
