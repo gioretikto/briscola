@@ -81,7 +81,7 @@ void move(struct player_data *cpu) {
 	if ((i = verifyCombo(cpu)) != 5)
 		;
 	else
-		i = min_max(cpu, MIN, -1);
+		i = min_max(cpu, MIN, SUB_ACES);
 	
 	cpu->slot = i;
 	
@@ -118,7 +118,7 @@ void move_reply(struct player_data *player) {
 		if (pm->card[pm->slot]->suit == game.briscola) {
 			
 			if (pm->card[pm->slot]->value == 11)	/* There is no way to reply to this card*/
-				i = min_max(pr, MIN, 1);
+				i = min_max(pr, MIN, ADD_ACES);
 				
 			else {
 		  		/* try to take with a card of max value first, if fails use the min card */
@@ -127,8 +127,8 @@ void move_reply(struct player_data *player) {
 				if (pr->card[tmp]->value > pm->card[pm->slot]->value)
 					i = tmp;
 					
-				else								 	/* if the max value cannot overtake*/
-					i = min_max(pr, MIN, 1);   /* try with min */
+				else							/* if the max value cannot overtake*/
+					i = min_max(pr, MIN, ADD_ACES);   /* try with min */
 			}
 		}
 			
@@ -141,7 +141,7 @@ void move_reply(struct player_data *player) {
 				if ((i = findBriscola(pr)) != 5)
 					;
 				else
-					i = min_max(pr, MIN, 1);
+					i = min_max(pr, MIN, ADD_ACES);
 			}
 		}
 
@@ -155,7 +155,7 @@ void move_reply(struct player_data *player) {
 			if ((i = findBriscola(pr)) != 5)
 				;
 			else
-				i = min_max(pr, MIN, 1);			/* reply with a card of lowest value */
+				i = min_max(pr, MIN, ADD_ACES);			/* reply with a card of lowest value */
 		}
 	}
 	
@@ -340,7 +340,7 @@ void draw_cards (struct player_data *player) {
 	}
 }
 
-unsigned int min_max (struct player_data *player, _Bool choice, int m) { 	/* if s == 0 calculate min else max */
+unsigned int min_max (struct player_data *player, _Bool choice, int unit) { 	/* if s == 0 calculate min else max */
 
 	unsigned int i, index;
 	int a[3];
@@ -358,7 +358,7 @@ unsigned int min_max (struct player_data *player, _Bool choice, int m) { 	/* if 
 		}
 		
 		if (player->card[i]->suit != game.briscola)
-			a[i] += m * game.memo[player->card[i]->suit];
+			a[i] += unit * game.memo[player->card[i]->suit];
 	}
 	
 	index = 0;

@@ -5,7 +5,7 @@
 
 enum suit {BASTONI, DENARI, COPPE, SPADE};
 enum states {BLOCK, PLAY, LAST_HAND=20};
-enum choice {MIN, MAX};
+enum choice {SUB_ACES =-1, MIN, MAX, ADD_ACES=1};
 
 enum players {PLY0, PLY1};
 
@@ -59,7 +59,7 @@ void init_game(struct player_data *player);
 void ply0_move(unsigned int index, struct player_data *player);
 void move_reply(struct player_data *player);
 void update_points(struct player_data *player);
-unsigned int min_max (struct player_data *player, _Bool s, int m);
+unsigned int min_max (struct player_data *player, _Bool s, int unit);
 void assign_points(struct player_data *player);
 void draw_cards(struct player_data *player);
 void move(struct player_data *cpu);
