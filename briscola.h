@@ -71,4 +71,3 @@ void start (GtkWidget *widget G_GNUC_UNUSED, struct player_data *player);
 unsigned int findBriscola(struct player_data *player);
 unsigned int verifyCombo (struct player_data *player);
 void displayCard(struct player_data *player, int index);
-int * sortCards(struct card *card, int unit);
