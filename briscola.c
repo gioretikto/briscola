@@ -3,6 +3,8 @@
 #include <string.h>
 #include <glib.h>
 
+#define FAIL 5
+
 extern struct card deck[CARDS];
 
 void init_game(struct player_data *player) {
@@ -78,7 +80,7 @@ void move(struct player_data *cpu) {
 
 	unsigned int i;
 	
-	if ((i = verifyCombo(cpu)) != 5)
+	if ((i = verifyCombo(cpu)) != FAIL)
 		;
 	else
 		i = min_max(cpu, MIN, SUB_ACES);
@@ -110,7 +112,7 @@ void move_reply(struct player_data *player) {
 	displayCard(pm, 0);
 
 	unsigned int i;
-	unsigned int tmp;	
+	unsigned int tmp;
 	
 	/* if it is an ace or three or 10 */
 	if (pm->card[pm->slot]->value == 11 || pm->card[pm->slot]->value == 10) {
@@ -134,29 +136,32 @@ void move_reply(struct player_data *player) {
 			
 		else { /* if the Ace of 3 has suit different from briscola */
 			
-			if ((i = findCharge(player)) != 5)
+			if ((i = catchWithNoBriscola(player)) != FAIL)
+				;
+				
+			else if ((i = findBriscola(pr)) != FAIL)
 				;
 			
-			else {
-				if ((i = findBriscola(pr)) != 5)
-					;
-				else
-					i = min_max(pr, MIN, ADD_ACES);
-			}
+			else
+				i = min_max(pr, MIN, ADD_ACES);
 		}
 
 	} /*End of if (pm->card[index]->value == 11 || .. */
 	
-	else if ((pm->card[pm->slot]->suit != game.briscola) && (pm->card[pm->slot]->value !=0)) {
+	else if ((pm->card[pm->slot]->suit != game.briscola) ) {
 	
-		if ((i = findCharge(player)) != 5)
+		if ((i = catchWithNoBriscola(player)) != FAIL)
 			;
-		else {
-			if ((i = findBriscola(pr)) != 5)
+		else if (pm->card[pm->slot]->value >= 3) {
+		
+			if ((i = findBriscola(pr)) != FAIL)
 				;
 			else
 				i = min_max(pr, MIN, ADD_ACES);			/* reply with a card of lowest value */
 		}
+		
+		else
+			i = min_max(pr, MIN, ADD_ACES);
 	}
 	
 	else	/* card played has 0 value */
@@ -279,7 +284,7 @@ gboolean clean_table (struct player_data *player) {
 		gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[player->slot]), player->card[player->slot]->file);
 		gtk_widget_show(table.PLY0_image[player->slot]);
 		
-		if (game.hand == 16) /*when there are only 2 cards left to play pile becomes back */
+		if (game.hand == LAST_HAND - 4) /*when there are only 2 cards left to play pile becomes back */
 			gtk_image_set_from_resource (GTK_IMAGE(table.image_deck_pile), "/cards/back.png");
 	}
 
@@ -287,7 +292,7 @@ gboolean clean_table (struct player_data *player) {
 	
 		if (player[PLY1].slot == 0) {
 			player[PLY1].card[0] = player[PLY1].card[1];
-			player[PLY1].card[1] = player[PLY1].card[2];			
+			player[PLY1].card[1] = player[PLY1].card[2];		
 		}
 		
 		if (player[PLY1].slot == 1)
@@ -386,18 +391,26 @@ unsigned int min_max (struct player_data *player, _Bool choice, int unit) { 	/* 
 	return index;
 }
 
-unsigned int findCharge(struct player_data *player) {
+unsigned int catchWithNoBriscola(struct player_data *player) {
 
 	unsigned int i;
 	
 	for (i = 0; i < game.lim; i++) {
-		if (player[PLY1].card[i]->suit == player[PLY0].card[player[PLY0].slot]->suit) {
-			if (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].slot]->value)
-				return i;
+	
+		if (player[PLY1].card[i]->suit == game.briscola)
+			continue;
+			
+		else {
+		
+			if (player[PLY1].card[i]->suit == player[PLY0].card[player[PLY0].slot]->suit) {
+		
+				if (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].slot]->value)
+					return i;
 			}
+		}
 	}
 		
-	return 5;
+	return FAIL;
 }
 
 unsigned int findBriscola(struct player_data *cpu) {
@@ -409,7 +422,7 @@ unsigned int findBriscola(struct player_data *cpu) {
 				return i;
 	}
 		
-	return 5;
+	return FAIL;
 }
 
 unsigned int verifyCombo (struct player_data *cpu) {	/*Try to see if PLY0 has all aces and 3s */
@@ -420,5 +433,5 @@ unsigned int verifyCombo (struct player_data *cpu) {	/*Try to see if PLY0 has al
 		if ((i = findBriscola(cpu)) != 5)
 			return i;
 
-	return 5;
+	return FAIL;
 }
