@@ -33,5 +33,5 @@ Installation steps
 All the best,
 Giovanni Resta <giovannirestadev@gmail.com>
 
-![Screenshot](https://github.com/gioretikto/briscola/brisca.png)
+![Screenshot](https://github.com/gioretikto/briscola/blob/master/brisca.png)
 
