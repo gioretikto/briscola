@@ -12,7 +12,7 @@ enum players {PLY0, PLY1};
 struct player_data {
 	int total;				/* total points */
 	struct card *card[3];
-	unsigned int slot;		/* card index  */
+	unsigned int box;		/* card index  */
 	unsigned int flag;
 };
 
@@ -59,7 +59,6 @@ void init_game(struct player_data *player);
 void ply0_move(unsigned int index, struct player_data *player);
 void move_reply(struct player_data *player);
 void update_points(struct player_data *player);
-unsigned int min_max (struct player_data *player, _Bool s, int unit);
 void assign_points(struct player_data *player);
 void draw_cards(struct player_data *player);
 void move(struct player_data *cpu);
@@ -68,6 +67,8 @@ unsigned int catchWithNoBriscola(struct player_data *player);
 void update_cards_left(void);
 void end_game(struct player_data *player);
 void start (GtkWidget *widget G_GNUC_UNUSED, struct player_data *player);
-unsigned int findBriscola(struct player_data *player);
+unsigned int catchWithBriscola(struct player_data *player);
 unsigned int verifyCombo (struct player_data *player);
 void displayCard(struct player_data *player, int index);
+void sortCards(struct player_data *cpu, int unit);
+int swap (struct card *a, struct card *b);

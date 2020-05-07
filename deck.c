@@ -48,12 +48,11 @@ struct card	deck[] = {
 
 /* The following is The Fisher–Yates algorithm to shuffle the deck */
 
-static void swap (struct card *a, struct card *b) { 
+void swap (struct card *a, struct card *b) { 
 	struct card temp = *a;
     *a = *b; 
     *b = temp; 
 }
-
 
 static int randgen(int lower, int upper) {
   int r;
