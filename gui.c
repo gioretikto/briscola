@@ -127,14 +127,6 @@ void start (GtkWidget *widget G_GNUC_UNUSED, struct player_data *player) {
 	
 	gtk_widget_show(table.image_briscola);
 	
-	gtk_widget_show(table.PLY0_image[0]);
-	gtk_widget_show(table.PLY0_image[1]);
-	gtk_widget_show(table.PLY0_image[2]);
-	
-	gtk_widget_show(table.PLY1_covered[0]);
-	gtk_widget_show(table.PLY1_covered[1]);
-	gtk_widget_show(table.PLY1_covered[2]);
-	
 	gtk_widget_show(table.image_deck_pile);
 }
 
@@ -227,8 +219,8 @@ void destroy (GtkWidget *window G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 	gtk_main_quit ();
 }
 
-void displayCard(struct player_data *player, int index) {
+void displayPlayedCard(struct player_data *player, int index) {
 
-	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[index]), player->card[player->slot]->file);		
+	gtk_image_set_from_resource (GTK_IMAGE(table.played_card[index]), player->card[player->box]->file);		
 	gtk_widget_show(table.played_card[index]);
 }

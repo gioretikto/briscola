@@ -9,21 +9,26 @@ extern struct card deck[CARDS];
 
 void init_game(struct player_data *player) {
 
+	game.hand = 1;
+	game.lim = 3;
+	player[PLY0].total = 0;
+	player[PLY1].total = 0;
+
 	shuffle(deck);
 	
 	game.briscola = deck[CARDS-1].suit;
 	
 	/* Deal first 6 cards */
 	
-	player[PLY0].card[0] = &deck[0];
-	player[PLY0].card[1] = &deck[1];
-	player[PLY0].card[2] = &deck[2];
+	/* for player */
+	
+	dealCards(&player[PLY0], 0);
 	
 	/* for CPU */
 	
-	player[PLY1].card[0] = &deck[3];
-	player[PLY1].card[1] = &deck[4];
-	player[PLY1].card[2] = &deck[5];
+	dealCards(&player[PLY1], 3);
+	
+	game.cards_dealt = 6;
 	
 	sortCards(&player[PLY1], SUB_ACES);
 	
@@ -34,22 +39,12 @@ void init_game(struct player_data *player) {
 	 	
 	printf("\n\n");
 	
-	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[0]), player->card[0]->file);
-	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[1]), player->card[1]->file);
-	gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[2]), player->card[2]->file);
-	
 	gtk_image_set_from_resource (GTK_IMAGE(table.image_briscola), deck[CARDS-1].file);
 	
 	/* Set image for deck right to the briscola */
 	gtk_image_set_from_resource (GTK_IMAGE(table.image_deck_pile), "/cards/deck.png");
 	
 	memset(game.memo, 0, sizeof(game.memo));
-	
-	player[PLY0].total = 0;
-	player[PLY1].total = 0;
-	game.hand = 1;
-	game.lim = 3;
-	game.cards_dealt = 6;
 	
 	update_cards_left();
 	
@@ -63,7 +58,7 @@ void init_game(struct player_data *player) {
 		game.status = BLOCK;
 		game.turn = PLY1;
 		game.next_player = PLY0;
-		move(&player[PLY1]);
+		move(player);
 	}
 }
 
@@ -80,28 +75,31 @@ void ply0_move(unsigned int index, struct player_data *player) {
 		move_reply(player);
 			
 	else {
-		displayCard(player, 1);
+		displayPlayedCard(player, 1);
 		assign_points(player);
 	}
 }
 
-void move(struct player_data *cpu) {
+void move(struct player_data *player) {
 
 	unsigned int i;
 	unsigned int j;
 	
-	sortCards(cpu, SUB_ACES);
+	sortCards(&player[PLY1], SUB_ACES);
 	
-	if ((i = verifyCombo(cpu)) != FAIL)
+	if (game.hand == LAST_HAND - 4)
+		i = 0;
+		
+	else if ((i = verifyCombo(player)) != FAIL)
 		;
 		
-	else {
+	else
 		i = 0;
-	}
 	
-	cpu->box = i;
+	player[PLY1].box = i;
 	
-	/* Hide card Played by PLY1 */	
+	/* Hide card Played by PLY1 */
+	
   	if (game.hand == LAST_HAND-2)							/* In the last 3 hands start hiding from card 3 */
 		gtk_widget_hide(table.PLY1_covered[2]);
 		
@@ -111,24 +109,24 @@ void move(struct player_data *cpu) {
 	else
 		gtk_widget_hide(table.PLY1_covered[i]);
 	
-	displayCard(cpu, 0);
+	displayPlayedCard(&player[PLY1], 0);
 
 	game.status = PLAY;
 	
 	for (j = 0; j < game.lim; j++)
-	 	printf("Card %u: value %d, suit %d\n", j+1, cpu->card[j]->value, cpu->card[j]->suit);
+	 	printf("Card %u: value %d, suit %d\n", j+1, player[PLY1].card[j]->value, player[PLY1].card[j]->suit);
 	 	
 	printf("\n\n");
 }
 
 void move_reply(struct player_data *player) {
 
-	struct player_data *pm, *pr; 	/* pm: player who moved*/
+	struct player_data *pm, *pr; 	/* pm: player who moved, pr: player who replied*/
 	
 	pm = player;
 	pr = player + 1;
 
-	displayCard(pm, 0);
+	displayPlayedCard(pm, 0);
 
 	unsigned int i;
 	unsigned int j;
@@ -169,7 +167,7 @@ void move_reply(struct player_data *player) {
 			
 		else if ((game.memo[game.briscola] == 2) && (pr->card[0]->value + pr->card[1]->value + pr->card[2]->value >= 16)) {
 		
-			if ((i = catchWithNoBriscola(player)) != FAIL)
+			if ((i = catchWithBriscola(player)) != FAIL)
 				;
 			else
 			  i = 0;
@@ -180,7 +178,10 @@ void move_reply(struct player_data *player) {
 	}
 	
 	else {				/* card played has 0 value */
-		i = 0;			/* reply with a card of lowest value */
+		if ((i = catchWithNoBriscola(player)) != FAIL)
+			;
+		else
+			i = 0;
 	}
 	
 	if (game.hand == LAST_HAND -4) {
@@ -215,7 +216,7 @@ void move_reply(struct player_data *player) {
 	
 	/* Move card played by PLY1 on the table */
 	
-	displayCard(pr, 1);
+	displayPlayedCard(pr, 1);
  	
 	/* Assign points of the hand */
 	assign_points(player);
@@ -285,7 +286,9 @@ void assign_points (struct player_data *player) {
 		
 	game.turn = winner->flag;
 	
-	/*update_points(winner);*/
+	game.hand++;
+	
+	update_points(winner);
 	
 	g_timeout_add(1000, (GSourceFunc)clean_table, player);
 }
@@ -295,13 +298,8 @@ gboolean clean_table (struct player_data *player) {
 	if (game.cards_dealt <= CARDS-2) {
 	
 		draw_cards(player);
-		gtk_widget_show(table.PLY1_covered[(player+1)->box]);
 		
-		/* Set the new card for PLY0 */
-		gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[player->box]), player->card[player->box]->file);
-		gtk_widget_show(table.PLY0_image[player->box]);
-		
-		if (game.hand == LAST_HAND - 4) /*when there are only 2 cards left to play pile becomes back */
+		if (game.hand == LAST_HAND - 3) /* when there are only 2 cards left to play pile becomes back */
 			gtk_image_set_from_resource (GTK_IMAGE(table.image_deck_pile), "/cards/back.png");
 			
 	}
@@ -324,13 +322,11 @@ gboolean clean_table (struct player_data *player) {
 	gtk_widget_hide(table.played_card[PLY0]);
 	gtk_widget_hide(table.played_card[PLY1]);
 	
-	game.hand++;
-	
 	if (game.hand == LAST_HAND + 1)
 		end_game(player);
 		
 	else if (game.turn == PLY1)
-		move(player+1);
+		move(player);
 		
 	else
 		game.status = PLAY;
@@ -343,13 +339,13 @@ void draw_cards (struct player_data *player) {
 	/* Draw new card from deck */
 
 	if (game.turn == PLY0) {
-		player->card[player->box] = &deck[game.cards_dealt];
-		(player+1)->card[(player+1)->box] = &deck[game.cards_dealt+1];
+		dealCards(&player[PLY0], game.cards_dealt);
+		dealCards(&player[PLY1], game.cards_dealt+1);
 	}
 	
 	else {
-		(player+1)->card[(player+1)->box] = &deck[game.cards_dealt];
-		player->card[player->box] = &deck[game.cards_dealt+1];
+		dealCards(&player[PLY1], game.cards_dealt);
+		dealCards(&player[PLY0], game.cards_dealt+1);
 	}
 	
 	game.cards_dealt += 2;
@@ -408,7 +404,7 @@ unsigned int catchWithNoBriscola(struct player_data *player) {
 
 	unsigned int i;
 	
-	for (i = 0; i < game.lim; i++) {
+	for (i = game.lim -1; i > 0; i--) {
 	
 		if (player[PLY1].card[i]->suit == game.briscola)
 			continue;
@@ -419,6 +415,8 @@ unsigned int catchWithNoBriscola(struct player_data *player) {
 		
 				if (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].box]->value)
 					return i;
+				else
+					break;
 			}
 		}
 	}
@@ -442,27 +440,65 @@ unsigned int catchWithBriscola(struct player_data *player) {
 				if (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].box]->value)
 						return i;
 			}
-			
-			else
-				return i;			
-			
+
 		}
 	}
 		
 	return FAIL;
 }
 
-unsigned int verifyCombo (struct player_data *cpu) {	/*Try to see if PLY0 has all aces and 3s */
+unsigned int verifyCombo (struct player_data *player) {	/*Try to see if PLY0 has all aces and 3s */
 	
 	unsigned int i;
 	
-	if ((cpu->card[0]->value + cpu->card[1]->value + cpu->card[2]->value) >= 30) {
+	if ((player[PLY1].card[0]->value + player[PLY1].card[1]->value + player[PLY1].card[2]->value) >= 30) {
 	
-		for (i = 0; i < game.lim; i++) {
-			if (cpu->card[i]->suit == game.briscola)
+		for (i = game.lim -1; i > 0; i--) {
+		
+			if ((player[PLY1].card[i]->suit == game.briscola) && (player[PLY1].card[i]->value > player[PLY0].card[player[PLY0].box]->value))
 				return i;
+			else
+				return FAIL;
 		}
 	}
 		
 	return FAIL;
+}
+
+void dealCards (struct player_data *player, unsigned int card_index) {
+
+	unsigned int i;
+
+	if (game.hand == 1) {
+	
+		for (i = 0; i < game.lim; i++) {
+	
+			player->card[i] = &deck[card_index];
+	
+			if (player->flag == PLY0) {
+				/* Set the new card for PLY0 */
+				gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[i]), player->card[i]->file);
+				gtk_widget_show(table.PLY0_image[i]);
+			}
+			
+			else
+				gtk_widget_show(table.PLY1_covered[i]);
+				
+			card_index++;
+					
+		}
+	}
+		
+	else {
+	
+		player->card[player->box] = &deck[card_index];
+				
+		if (player->flag == PLY0) {
+			gtk_image_set_from_resource (GTK_IMAGE(table.PLY0_image[player->box]), player->card[player->box]->file);
+			gtk_widget_show(table.PLY0_image[player->box]);
+		}
+			
+		else
+			gtk_widget_show(table.PLY1_covered[player->box]);
+	}
 }
