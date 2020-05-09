@@ -4,11 +4,14 @@ CFLAGS+= -D__EXTENSIONS__
 LDLIBS = `pkg-config --libs gtk+-3.0`
 SRCS = main.c deck.c gui.c briscola.c resources.c
 OBJS = $(SRCS:.c=.o)
+BINDIR = /usr/local/bin/
+INSTALL = install
+TARGET = briscola
 
 briscola: $(OBJS)
 	 $(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 clean:
 	rm -f $(OBJS)
-install:
-	install $(TARGET) /usr/local/bin
+install: $(TARGET)
+	$(INSTALL) $(TARGET) $(BINDIR)
 	

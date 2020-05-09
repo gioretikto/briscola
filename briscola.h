@@ -71,5 +71,5 @@ unsigned int catchWithBriscola(struct player_data *player);
 unsigned int verifyCombo (struct player_data *player);
 void displayPlayedCard(struct player_data *player, int index);
 void sortCards(struct player_data *cpu, int unit);
-int swap (struct card *a, struct card *b);
+void swap (struct card *a, struct card *b);
 void dealCards (struct player_data *player, unsigned int card_index);

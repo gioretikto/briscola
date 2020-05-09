@@ -178,10 +178,16 @@ void move_reply(struct player_data *player) {
 	}
 	
 	else {				/* card played has 0 value */
+	
 		if ((i = catchWithNoBriscola(player)) != FAIL)
 			;
+		
+		else if ((i = verifyCombo(player)) != FAIL)
+		;
+		
 		else
 			i = 0;
+			
 	}
 	
 	if (game.hand == LAST_HAND -4) {
@@ -361,9 +367,10 @@ void draw_cards (struct player_data *player) {
 
 void sortCards(struct player_data *cpu, int unit) {
 
-	unsigned int i;
+	unsigned int i, j;
 	
 	int a[3];
+	int tmp;
 	
 	game.memo[game.briscola] = 0;
 	
@@ -387,17 +394,18 @@ void sortCards(struct player_data *cpu, int unit) {
 			a[i] += unit * game.memo[cpu->card[i]->suit];			
 	}
 	
-	/* Find the minimum element */
+	for (i = 0; i < game.lim-1; i++)  {    
 	
-	unsigned int min = 0;
-	
-	for (i = 1; i < game.lim; i++) {
-	
-		if (a[i] < a[min]) {
-		   swap(cpu->card[i], cpu->card[min]);
-		   min = i;
-		}
-  	}
+		for (j = 0; j < game.lim-1-i; j++) {
+		
+			if (a[j] > a[j+1]) {
+				swap(cpu->card[j], cpu->card[j+1]);
+				tmp = a[j+1];
+				a[j+1] = a[j];
+				a[j] = tmp;
+			}
+	  	}
+	}
 }
 
 unsigned int catchWithNoBriscola(struct player_data *player) {

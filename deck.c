@@ -67,6 +67,6 @@ static int randgen(int lower, int upper) {
   
 void shuffle(struct card *xdeck) {
   for (int i = CARDS - 1; i >= 1; --i)
-    swap(&xdeck[i],             		 // swap the current element
+    swap(&xdeck[i],             	  // swap the current element
          &xdeck[randgen(0, i)]);      // with some random element
 }
