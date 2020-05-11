@@ -43,5 +43,6 @@
 	<file>40.png</file>
 	<file>back.png</file>
 	<file>deck.png</file>
+	<file>style.css</file>
   </gresource>
 </gresources>

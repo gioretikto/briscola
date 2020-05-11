@@ -51,7 +51,7 @@ void create_window() {
 	gtk_window_maximize (GTK_WINDOW (window));
 	
 	GtkCssProvider *css_provider = gtk_css_provider_new();		/* Apply style */
-	gtk_css_provider_load_from_path (css_provider, "style.css", NULL);
+	gtk_css_provider_load_from_resource (css_provider, "/cards/style.css");
   		
 	GdkScreen *myScreen = gdk_screen_get_default();
 	gtk_style_context_add_provider_for_screen (myScreen, GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
