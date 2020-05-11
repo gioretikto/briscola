@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c99 -W -Wextra -Werror -Wall -pedantic `pkg-config --cflags gtk+-3.0` -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wconversion
-SYSTEM = uname -s
+SYSTEM = `uname -s`
 
 ifeq ($(SYSTEM), SunOS)
 	CFLAGS+= -D__EXTENSIONS__
