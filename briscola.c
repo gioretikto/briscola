@@ -394,7 +394,7 @@ void sortCards(struct player_data *cpu, int unit) {
 			a[i] += unit * game.memo[cpu->card[i]->suit];			
 	}
 	
-	for (i = 0; i < game.lim-1; i++)  {    
+	for (i = 0; i < game.lim-1; i++)  {
 	
 		for (j = 0; j < game.lim-1-i; j++) {
 		
